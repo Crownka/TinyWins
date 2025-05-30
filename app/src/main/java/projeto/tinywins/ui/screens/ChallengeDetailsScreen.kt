@@ -160,7 +160,6 @@ fun ChallengeDetailsScreen(
 
                 Text("TODO: Botões de Ação adicionais", style = MaterialTheme.typography.labelMedium)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("TODO: Player Multimídia (Opcional)", style = MaterialTheme.typography.labelMedium)
 
             } else {
                 Text("Desafio não encontrado.", modifier = Modifier.padding(top = 16.dp))
