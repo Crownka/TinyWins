@@ -34,7 +34,6 @@ fun RelatedChallengeItem(
             modifier = Modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // TODO: Adicionar um Ícone da Categoria ou imagem pequena aqui se desejar
 
             Spacer(modifier = Modifier.height(4.dp))
 

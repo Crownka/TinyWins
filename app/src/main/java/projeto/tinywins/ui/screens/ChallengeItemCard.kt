@@ -39,7 +39,6 @@ fun ChallengeItemCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // TODO: Adicionar imageResId aqui se desejar (ex: com um Icon ou AsyncImage)
             Column(
                 modifier = Modifier.weight(1f)
             ) {
