@@ -3,14 +3,14 @@ package projeto.tinywins.data
 import androidx.annotation.DrawableRes
 
 enum class ChallengeCategory {
-    HEALTH,
-    PRODUCTIVITY,
-    CREATIVITY,
-    LEARNING,
-    MINDFULNESS,
+    SAUDE,
+    PRODUTIVIDADE,
+    CRIATIVIDADE,
+    APRENDIZADO,
+    AUTOCONHECIMENTO,
     SOCIAL,
-    FINANCES,
-    ORGANIZATION
+    FINANCAS,
+    ORGANIZACAO
 }
 
 data class TinyWinChallenge(
@@ -26,6 +26,5 @@ data class TinyWinChallenge(
     val quantifiable: Boolean = false,
     var currentProgress: Int = 0,
     val targetProgress: Int = 1,
-
     val pointsPerUnit: Int = 0
 )

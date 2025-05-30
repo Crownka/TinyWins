@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import projeto.tinywins.data.TinyWinChallenge
 import projeto.tinywins.data.sampleChallenges
+import projeto.tinywins.data.ChallengeCategory
 import projeto.tinywins.ui.theme.TinyWinsTheme
 import projeto.tinywins.ui.Screen
 
@@ -45,10 +47,16 @@ fun ChallengeDetailsScreen(
 ) {
     val challenge = sampleChallenges.find { it.id == challengeId }
 
-    var isFavoriteState by remember(challenge?.id) {
+
+    var currentLocalIsFavorite by remember(challenge?.id) {
         mutableStateOf(challenge?.isFavorite ?: false)
     }
 
+    LaunchedEffect(challenge?.isFavorite) {
+        if (challenge != null) {
+            currentLocalIsFavorite = challenge.isFavorite
+        }
+    }
 
     val relatedChallenges = remember(challenge?.id, challenge?.category) {
         if (challenge == null) {
@@ -75,13 +83,16 @@ fun ChallengeDetailsScreen(
                 actions = {
                     if (challenge != null) {
                         IconButton(onClick = {
-                            isFavoriteState = !isFavoriteState
-                            println("Desafio '${challenge.title}' marcado como favorito: $isFavoriteState")
+                            // 1. Modifica a propriedade no objeto da lista sampleChallenges
+                            challenge.isFavorite = !challenge.isFavorite
+                            // 2. Atualiza o estado local para a UI refletir imediatamente
+                            currentLocalIsFavorite = challenge.isFavorite
+                            println("ChallengeDetailsScreen: Desafio '${challenge.title}' marcado como favorito: ${challenge.isFavorite}")
                         }) {
                             Icon(
-                                imageVector = if (isFavoriteState) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                contentDescription = if (isFavoriteState) "Desmarcar como favorito" else "Marcar como favorito",
-                                tint = if (isFavoriteState) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                imageVector = if (currentLocalIsFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                                contentDescription = if (currentLocalIsFavorite) "Desmarcar como favorito" else "Marcar como favorito",
+                                tint = if (currentLocalIsFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -110,7 +121,7 @@ fun ChallengeDetailsScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Categoria: ${challenge.category.name.toLowerCase().capitalize()}",
+                    text = "Categoria: ${challenge.category.name.toLowerCase().capitalize().replace("_", " ")}", // Substitui _ por espaço
                     style = MaterialTheme.typography.titleSmall
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -124,7 +135,6 @@ fun ChallengeDetailsScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-
 
                 if (relatedChallenges.isNotEmpty()) {
                     Text(
@@ -140,8 +150,7 @@ fun ChallengeDetailsScreen(
                             RelatedChallengeItem(
                                 challenge = relatedChallenge,
                                 onClick = {
-                                    navController.navigate(Screen.ChallengeDetails.createRoute(relatedChallenge.id)) {
-                                    }
+                                    navController.navigate(Screen.ChallengeDetails.createRoute(relatedChallenge.id))
                                 }
                             )
                         }
@@ -149,11 +158,9 @@ fun ChallengeDetailsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-
                 Text("TODO: Botões de Ação adicionais", style = MaterialTheme.typography.labelMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("TODO: Player Multimídia (Opcional)", style = MaterialTheme.typography.labelMedium)
-
 
             } else {
                 Text("Desafio não encontrado.", modifier = Modifier.padding(top = 16.dp))
@@ -167,10 +174,15 @@ fun ChallengeDetailsScreen(
 fun ChallengeDetailsScreenPreview() {
     TinyWinsTheme {
         val navController = rememberNavController()
-        val previewChallenge = sampleChallenges.firstOrNull()?.apply { isFavorite = false }
+        val previewChallenge = TinyWinChallenge(
+            id = "preview_id_1", title = "Preview Challenge", description = "Desc",
+            points = 10, category = ChallengeCategory.APRENDIZADO, imageResId = null, isFavorite = false
+        )
+        val firstSampleId = sampleChallenges.firstOrNull()?.id
+
         ChallengeDetailsScreen(
             navController = navController,
-            challengeId = previewChallenge?.id
+            challengeId = firstSampleId
         )
     }
 }
