@@ -1,10 +1,10 @@
-package projeto.tinywins.data // Ou o nome do pacote onde você criou Challenge.kt
+package projeto.tinywins.data
 
-import java.util.UUID // Para gerar IDs únicos
+import java.util.UUID
 
-// Lista de desafios mockados para o aplicativo Tiny Wins
+
 val sampleChallenges = listOf(
-    // --- 7 Desafios Anteriores ---
+
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
         title = "Beber 8 copos d'água",
@@ -51,15 +51,6 @@ val sampleChallenges = listOf(
     ),
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
-        title = "3 Coisas para Agradecer",
-        description = "Pratique a gratidão listando três coisas boas do seu dia.",
-        points = 10,
-        category = ChallengeCategory.MINDFULNESS,
-        imageResId = null,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
         title = "10 minutos de Alongamento",
         description = "Faça uma pausa para se alongar e relaxar os músculos.",
         points = 10,
@@ -71,7 +62,7 @@ val sampleChallenges = listOf(
     ),
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
-        title = "Desenhar por 5 minutos",
+        title = "Desenhar por 10 minutos",
         description = "Solte sua criatividade desenhando o que vier à mente.",
         points = 15,
         category = ChallengeCategory.CREATIVITY,
@@ -80,8 +71,6 @@ val sampleChallenges = listOf(
         currentProgress = 0,
         targetProgress = 5 // 5 minutos
     ),
-
-    // --- 8 Novos Desafios ---
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
         title = "Meditar por 5 minutos",
@@ -99,24 +88,6 @@ val sampleChallenges = listOf(
         description = "Um ambiente limpo ajuda na concentração. Organize sua mesa.",
         points = 10,
         category = ChallengeCategory.ORGANIZATION,
-        imageResId = null,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Enviar mensagem para um amigo",
-        description = "Fortaleça laços. Mande uma mensagem para um amigo ou familiar.",
-        points = 10,
-        category = ChallengeCategory.SOCIAL,
-        imageResId = null,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Aprender uma palavra nova",
-        description = "Expanda seu vocabulário aprendendo o significado de uma palavra nova.",
-        points = 5,
-        category = ChallengeCategory.LEARNING,
         imageResId = null,
         quantifiable = false
     ),

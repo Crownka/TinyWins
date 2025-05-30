@@ -1,17 +1,20 @@
-package projeto.tinywins // Pacote correto
+package projeto.tinywins
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import projeto.tinywins.data.sampleChallenges
+import projeto.tinywins.ui.NavArgs
+import projeto.tinywins.ui.Screen
+import projeto.tinywins.ui.screens.ChallengeDetailsScreen
+import projeto.tinywins.ui.screens.FavoritesScreen
+import projeto.tinywins.ui.screens.HomeScreen
 import projeto.tinywins.ui.theme.TinyWinsTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,46 +22,55 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TinyWinsTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Home.route
                 ) {
-                    Greeting("Tiny Wins")
+                    composable(route = Screen.Home.route) {
+                        HomeScreen(
+                            navController = navController,
+                            challenges = sampleChallenges,
+                            onChallengeClick = { challenge ->
+                                navController.navigate(Screen.ChallengeDetails.createRoute(challenge.id))
+                            }
+                        )
+                    }
+
+                    composable(
+                        route = Screen.ChallengeDetails.route,
+                        arguments = listOf(navArgument(NavArgs.CHALLENGE_ID) { type = NavType.StringType })
+                    ) { navBackStackEntry ->
+                        val challengeId = navBackStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID)
+                        ChallengeDetailsScreen(
+                            navController = navController,
+                            challengeId = challengeId
+                        )
+                    }
+
+                    composable(route = Screen.Favorites.route) {
+                        val currentlyFavoriteChallenges = sampleChallenges.filter { it.isFavorite }
+                        FavoritesScreen(
+                            navController = navController,
+                            favoriteChallenges = currentlyFavoriteChallenges,
+                            onChallengeClick = { challenge ->
+                                navController.navigate(Screen.ChallengeDetails.createRoute(challenge.id))
+                            }
+                        )
+                    }
+
+                    composable(route = Screen.Settings.route) {
+                        Text("Tela de Configurações (Placeholder)")
+                    }
+                    composable(route = Screen.Help.route) {
+                        Text("Tela de Ajuda (Placeholder)")
+                    }
+                    composable(route = Screen.Profile.route) {
+                        Text("Tela de Perfil (Placeholder)")
+                    }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Olá, $name!",
-            style = MaterialTheme.typography.headlineSmall
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Light Mode Preview")
-@Composable
-fun DefaultPreviewLight() {
-    TinyWinsTheme(darkTheme = false, dynamicColor = false) {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            Greeting("Tiny Wins Preview")
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode Preview")
-@Composable
-fun DefaultPreviewDark() {
-    TinyWinsTheme(darkTheme = true, dynamicColor = false) {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            Greeting("Tiny Wins Preview")
         }
     }
 }

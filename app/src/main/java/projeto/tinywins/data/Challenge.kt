@@ -21,6 +21,7 @@ data class TinyWinChallenge(
     val category: ChallengeCategory,
     @DrawableRes val imageResId: Int?,
     var isCompleted: Boolean = false,
+    var isFavorite: Boolean = false,
 
     val quantifiable: Boolean = false,
     var currentProgress: Int = 0,
