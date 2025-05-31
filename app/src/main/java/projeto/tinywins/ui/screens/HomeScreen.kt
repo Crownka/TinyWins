@@ -71,13 +71,13 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = { // Conteúdo da TopAppBar restaurado aqui
+        topBar = {
             TopAppBar(
                 title = { Text("Tiny Wins") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer // Garante cor dos ícones de ação
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 actions = {
                     Box {
@@ -117,7 +117,7 @@ fun HomeScreen(
                 }
             )
         },
-        bottomBar = { // Conteúdo da NavigationBar restaurado aqui
+        bottomBar = {
             NavigationBar {
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.Home, contentDescription = "Início") },
@@ -150,7 +150,7 @@ fun HomeScreen(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding) // innerPadding do Scaffold é aplicado aqui
+                .padding(innerPadding)
                 .fillMaxSize()
         ) {
             OutlinedTextField(
@@ -197,7 +197,7 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    TinyWinsTheme {
+    TinyWinsTheme(useDarkTheme = true) {
         val navController = rememberNavController()
         HomeScreen(
             navController = navController,

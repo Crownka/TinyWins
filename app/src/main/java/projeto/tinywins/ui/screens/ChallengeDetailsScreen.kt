@@ -171,7 +171,7 @@ fun ChallengeDetailsScreen(
 @Preview(showBackground = true)
 @Composable
 fun ChallengeDetailsScreenPreview() {
-    TinyWinsTheme {
+    TinyWinsTheme(useDarkTheme = true) {
         val navController = rememberNavController()
         val previewChallenge = TinyWinChallenge(
             id = "preview_id_1", title = "Preview Challenge", description = "Desc",

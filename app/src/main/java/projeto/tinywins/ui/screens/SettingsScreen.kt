@@ -1,6 +1,5 @@
 package projeto.tinywins.ui.screens
 
-import androidx.compose.foundation.isSystemInDarkTheme // Certifique-se que esta importação existe
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,10 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,23 +31,17 @@ import projeto.tinywins.ui.theme.TinyWinsTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    navController: NavHostController
-    // TODO: Adicionar um callback para alterar o tema do app: onThemeChange: (Boolean) -> Unit
+    navController: NavHostController,
+    currentThemeIsDark: Boolean,      // Recebe o estado atual do tema
+    onThemeToggled: (Boolean) -> Unit // Função para avisar que o tema mudou
 ) {
-    // CORREÇÃO APLICADA AQUI:
-    val systemInitialThemeIsDark = isSystemInDarkTheme() // Chamada correta do Composable
-    var isDarkModeEnabled by remember { mutableStateOf(systemInitialThemeIsDark) }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Configurações") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar"
-                        )
+                    IconButton(onClick = { navController.popBackStack() }) { // Botão para voltar
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -69,59 +58,41 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Preferências de Tema",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Text("Preferências de Tema", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
 
+            // Linha para a opção de Modo Escuro
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Modo Escuro",
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Text("Modo Escuro", style = MaterialTheme.typography.bodyLarge)
                 Switch(
-                    checked = isDarkModeEnabled,
+                    checked = currentThemeIsDark, // O estado do Switch vem do parâmetro
                     onCheckedChange = { newCheckedState ->
-                        isDarkModeEnabled = newCheckedState
-                        // TODO: Chamar onThemeChange(newCheckedState) para aplicar no app todo
-                        println("Modo Escuro alterado para: $newCheckedState")
+                        onThemeToggled(newCheckedState)
                     }
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Outras Configurações",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Text("Outras Configurações", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+            // TODO: F4 - Adicionar botões reais aqui
             Text("TODO: Botão Limpar Favoritos", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
             Text("TODO: Botão Redefinir Preferências", style = MaterialTheme.typography.bodyLarge)
 
             Spacer(modifier = Modifier.height(16.dp))
+            // Linha para a opção de Notificações
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Notificações",
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Text("Notificações", style = MaterialTheme.typography.bodyLarge)
                 Switch(
-                    checked = false, // TODO: Estado para notificações
-                    onCheckedChange = { /* TODO: Lógica para notificações */ }
+                    checked = false, // TODO: F4 - Estado e lógica para notificações
+                    onCheckedChange = { /* TODO */ }
                 )
             }
         }
@@ -131,17 +102,25 @@ fun SettingsScreen(
 @Preview(showBackground = true, name = "Settings Screen Light")
 @Composable
 fun SettingsScreenPreviewLight() {
-    TinyWinsTheme(darkTheme = false) {
+    TinyWinsTheme(useDarkTheme = false) {
         val navController = rememberNavController()
-        SettingsScreen(navController = navController)
+        SettingsScreen(
+            navController = navController,
+            currentThemeIsDark = false,
+            onThemeToggled = {}
+        )
     }
 }
 
 @Preview(showBackground = true, name = "Settings Screen Dark")
 @Composable
 fun SettingsScreenPreviewDark() {
-    TinyWinsTheme(darkTheme = true) {
+    TinyWinsTheme(useDarkTheme = true) {
         val navController = rememberNavController()
-        SettingsScreen(navController = navController)
+        SettingsScreen(
+            navController = navController,
+            currentThemeIsDark = true,
+            onThemeToggled = {}
+        )
     }
 }

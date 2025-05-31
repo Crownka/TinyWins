@@ -84,7 +84,7 @@ fun FavoritesScreen(
 @Preview(showBackground = true, name = "Favorites Screen with Items")
 @Composable
 fun FavoritesScreenPreview() {
-    TinyWinsTheme {
+    TinyWinsTheme(useDarkTheme = true) {
         val navController = rememberNavController()
         val previewChallenges = sampleChallenges.take(3).map { it.copy(isFavorite = true) }
         FavoritesScreen(
@@ -98,7 +98,7 @@ fun FavoritesScreenPreview() {
 @Preview(showBackground = true, name = "Favorites Screen Empty")
 @Composable
 fun FavoritesScreenEmptyPreview() {
-    TinyWinsTheme {
+    TinyWinsTheme(useDarkTheme = true) {
         val navController = rememberNavController()
         FavoritesScreen(
             navController = navController,

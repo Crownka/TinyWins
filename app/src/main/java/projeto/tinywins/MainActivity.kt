@@ -3,7 +3,12 @@ package projeto.tinywins
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.Text // Para os placeholders
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,22 +20,25 @@ import projeto.tinywins.ui.Screen
 import projeto.tinywins.ui.screens.ChallengeDetailsScreen
 import projeto.tinywins.ui.screens.FavoritesScreen
 import projeto.tinywins.ui.screens.HomeScreen
-import projeto.tinywins.ui.screens.SettingsScreen // Importe sua nova tela de Configurações
+import projeto.tinywins.ui.screens.SettingsScreen
 import projeto.tinywins.ui.theme.TinyWinsTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TinyWinsTheme { // Seu tema Material 3
+            // Inicializa com o tema do sistema.
+            val systemInitialThemeIsDark = isSystemInDarkTheme()
+            var currentDarkTheme by remember { mutableStateOf(systemInitialThemeIsDark) }
+
+            TinyWinsTheme(useDarkTheme = currentDarkTheme) {
                 val navController = rememberNavController()
 
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.Home.route // Define a tela inicial
+                    startDestination = Screen.Home.route
                 ) {
-                    // Destino para a HomeScreen
-                    composable(route = Screen.Home.route) {
+                    composable(Screen.Home.route) {
                         HomeScreen(
                             navController = navController,
                             challenges = sampleChallenges,
@@ -39,48 +47,38 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
-                    // Rota para Detalhes do Desafio
                     composable(
-                        route = Screen.ChallengeDetails.route, // "challenge_details_screen/{challengeId}"
+                        route = Screen.ChallengeDetails.route,
                         arguments = listOf(navArgument(NavArgs.CHALLENGE_ID) { type = NavType.StringType })
-                    ) { navBackStackEntry ->
-                        val challengeId = navBackStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID)
+                    ) { backStackEntry ->
+                        val challengeId = backStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID)
                         ChallengeDetailsScreen(
                             navController = navController,
                             challengeId = challengeId
                         )
                     }
-
-                    // Rota para Favoritos
-                    composable(route = Screen.Favorites.route) {
-                        val currentlyFavoriteChallenges = sampleChallenges.filter { it.isFavorite }
+                    composable(Screen.Favorites.route) {
+                        val favorites = sampleChallenges.filter { it.isFavorite }
                         FavoritesScreen(
                             navController = navController,
-                            favoriteChallenges = currentlyFavoriteChallenges,
+                            favoriteChallenges = favorites,
                             onChallengeClick = { challenge ->
                                 navController.navigate(Screen.ChallengeDetails.createRoute(challenge.id))
                             }
                         )
                     }
-
-                    // Rota para Configurações
-                    composable(route = Screen.Settings.route) {
+                    composable(Screen.Settings.route) {
+                        // Passa o estado atual do tema e a função para alterá-lo.
                         SettingsScreen(
-                            navController = navController
-                            // TODO: Passar o callback onThemeChange quando implementado
+                            navController = navController,
+                            currentThemeIsDark = currentDarkTheme,
+                            onThemeToggled = { newThemeState ->
+                                currentDarkTheme = newThemeState
+                            }
                         )
                     }
-
-                    // Placeholders para as outras telas
-                    composable(route = Screen.Help.route) {
-                        // TODO: Substituir por HelpScreen(navController)
-                        Text("Tela de Ajuda (Placeholder)")
-                    }
-                    composable(route = Screen.Profile.route) {
-                        // TODO: Substituir por ProfileScreen(navController)
-                        Text("Tela de Perfil (Placeholder)")
-                    }
+                    composable(Screen.Help.route) { Text("Tela de Ajuda (Placeholder)") }
+                    composable(Screen.Profile.route) { Text("Tela de Perfil (Placeholder)") }
                 }
             }
         }
