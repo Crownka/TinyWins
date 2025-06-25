@@ -1,6 +1,7 @@
-package projeto.tinywins.ui.screens
+package projeto.tinywins.ui.components // Pacote corrigido
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -13,9 +14,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import projeto.tinywins.data.TinyWinChallenge
+import projeto.tinywins.data.sampleChallenges
+import projeto.tinywins.ui.theme.TinyWinsTheme
 
 @Composable
 fun RelatedChallengeItem(
@@ -26,30 +33,41 @@ fun RelatedChallengeItem(
     Card(
         modifier = modifier
             .width(160.dp)
-            .padding(horizontal = 4.dp)
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            Spacer(modifier = Modifier.height(4.dp))
-
             Text(
                 text = challenge.title,
                 style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.height(40.dp)
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
-                text = "${challenge.points} pts",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
+                text = "${challenge.xp} XP",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFFFFC107)
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun RelatedChallengeItemPreview() {
+    TinyWinsTheme(useDarkTheme = false) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            RelatedChallengeItem(challenge = sampleChallenges.first(), onClick = {})
         }
     }
 }

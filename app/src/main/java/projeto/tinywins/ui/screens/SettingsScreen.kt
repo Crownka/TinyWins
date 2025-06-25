@@ -32,16 +32,21 @@ import projeto.tinywins.ui.theme.TinyWinsTheme
 @Composable
 fun SettingsScreen(
     navController: NavHostController,
-    currentThemeIsDark: Boolean,      // Recebe o estado atual do tema
-    onThemeToggled: (Boolean) -> Unit // Função para avisar que o tema mudou
+    currentThemeIsDark: Boolean,
+    onThemeToggled: (Boolean) -> Unit,
+    areNotificationsEnabled: Boolean,
+    onNotificationsToggled: (Boolean) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Configurações") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) { // Botão para voltar
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -58,43 +63,58 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            Text("Preferências de Tema", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+            Text(
+                text = "Preferências Gerais",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
             // Linha para a opção de Modo Escuro
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Modo Escuro", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = "Modo Escuro",
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 Switch(
-                    checked = currentThemeIsDark, // O estado do Switch vem do parâmetro
-                    onCheckedChange = { newCheckedState ->
-                        onThemeToggled(newCheckedState)
-                    }
+                    checked = currentThemeIsDark,
+                    onCheckedChange = onThemeToggled
+                )
+            }
+
+            // Linha para a opção de Notificações
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Notificações",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Switch(
+                    checked = areNotificationsEnabled,
+                    onCheckedChange = onNotificationsToggled
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Text("Outras Configurações", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
-            // TODO: F4 - Adicionar botões reais aqui
+
+            Text(
+                text = "Outras Configurações",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
             Text("TODO: Botão Limpar Favoritos", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
             Text("TODO: Botão Redefinir Preferências", style = MaterialTheme.typography.bodyLarge)
-
-            Spacer(modifier = Modifier.height(16.dp))
-            // Linha para a opção de Notificações
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Notificações", style = MaterialTheme.typography.bodyLarge)
-                Switch(
-                    checked = false, // TODO: F4 - Estado e lógica para notificações
-                    onCheckedChange = { /* TODO */ }
-                )
-            }
         }
     }
 }
@@ -107,7 +127,9 @@ fun SettingsScreenPreviewLight() {
         SettingsScreen(
             navController = navController,
             currentThemeIsDark = false,
-            onThemeToggled = {}
+            onThemeToggled = {},
+            areNotificationsEnabled = true,
+            onNotificationsToggled = {}
         )
     }
 }
@@ -120,7 +142,9 @@ fun SettingsScreenPreviewDark() {
         SettingsScreen(
             navController = navController,
             currentThemeIsDark = true,
-            onThemeToggled = {}
+            onThemeToggled = {},
+            areNotificationsEnabled = false,
+            onNotificationsToggled = {}
         )
     }
 }
