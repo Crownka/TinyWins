@@ -22,6 +22,7 @@ import projeto.tinywins.data.sampleChallenges
 import projeto.tinywins.ui.NavArgs
 import projeto.tinywins.ui.Screen
 import projeto.tinywins.ui.screens.ChallengeDetailsScreen
+import projeto.tinywins.ui.screens.CreateTaskScreen // Importe a nova tela
 import projeto.tinywins.ui.screens.FavoritesScreen
 import projeto.tinywins.ui.screens.HomeScreen
 import projeto.tinywins.ui.screens.ProfileScreen
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
             val coroutineScope = rememberCoroutineScope()
             val currentDarkTheme by settingsDataStore.themePreferenceFlow.collectAsState(initial = isSystemInDarkTheme())
             val areNotificationsEnabled by settingsDataStore.notificationsPreferenceFlow.collectAsState(initial = true)
+            val areAnimationsEnabled by settingsDataStore.animationsPreferenceFlow.collectAsState(initial = true)
 
             TinyWinsTheme(useDarkTheme = currentDarkTheme) {
                 val navController = rememberNavController()
@@ -47,15 +49,14 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     startDestination = Screen.Home.route
                 ) {
-                    // Mudei a duração da animação aqui para 700ms
-                    val fadeSpec = tween<Float>(durationMillis = 700)
+                    val animationSpec = tween<Float>(durationMillis = 700)
 
                     composable(
                         route = Screen.Home.route,
-                        enterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        exitTransition = { fadeOut(animationSpec = fadeSpec) },
-                        popEnterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        popExitTransition = { fadeOut(animationSpec = fadeSpec) }
+                        enterTransition = { fadeIn(animationSpec = animationSpec) },
+                        exitTransition = { fadeOut(animationSpec = animationSpec) },
+                        popEnterTransition = { fadeIn(animationSpec = animationSpec) },
+                        popExitTransition = { fadeOut(animationSpec = animationSpec) }
                     ) {
                         HomeScreen(
                             navController = navController,
@@ -69,10 +70,10 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = Screen.ChallengeDetails.route,
                         arguments = listOf(navArgument(NavArgs.CHALLENGE_ID) { type = NavType.StringType }),
-                        enterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        exitTransition = { fadeOut(animationSpec = fadeSpec) },
-                        popEnterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        popExitTransition = { fadeOut(animationSpec = fadeSpec) }
+                        enterTransition = { fadeIn(animationSpec = animationSpec) },
+                        exitTransition = { fadeOut(animationSpec = animationSpec) },
+                        popEnterTransition = { fadeIn(animationSpec = animationSpec) },
+                        popExitTransition = { fadeOut(animationSpec = animationSpec) }
                     ) { backStackEntry ->
                         val challengeId = backStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID)
                         ChallengeDetailsScreen(
@@ -83,10 +84,10 @@ class MainActivity : ComponentActivity() {
 
                     composable(
                         route = Screen.Favorites.route,
-                        enterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        exitTransition = { fadeOut(animationSpec = fadeSpec) },
-                        popEnterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        popExitTransition = { fadeOut(animationSpec = fadeSpec) }
+                        enterTransition = { fadeIn(animationSpec = animationSpec) },
+                        exitTransition = { fadeOut(animationSpec = animationSpec) },
+                        popEnterTransition = { fadeIn(animationSpec = animationSpec) },
+                        popExitTransition = { fadeOut(animationSpec = animationSpec) }
                     ) {
                         val favorites = sampleChallenges.filter { it.isFavorite }
                         FavoritesScreen(
@@ -100,10 +101,10 @@ class MainActivity : ComponentActivity() {
 
                     composable(
                         route = Screen.Settings.route,
-                        enterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        exitTransition = { fadeOut(animationSpec = fadeSpec) },
-                        popEnterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        popExitTransition = { fadeOut(animationSpec = fadeSpec) }
+                        enterTransition = { fadeIn(animationSpec = animationSpec) },
+                        exitTransition = { fadeOut(animationSpec = animationSpec) },
+                        popEnterTransition = { fadeIn(animationSpec = animationSpec) },
+                        popExitTransition = { fadeOut(animationSpec = animationSpec) }
                     ) {
                         SettingsScreen(
                             navController = navController,
@@ -118,28 +119,43 @@ class MainActivity : ComponentActivity() {
                                 coroutineScope.launch {
                                     settingsDataStore.saveNotificationsPreference(isEnabled)
                                 }
+                            },
+                            areAnimationsEnabled = areAnimationsEnabled,
+                            onAnimationsToggled = { isEnabled ->
+                                coroutineScope.launch {
+                                    settingsDataStore.saveAnimationsPreference(isEnabled)
+                                }
                             }
                         )
                     }
 
                     composable(
                         route = Screen.Help.route,
-                        enterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        exitTransition = { fadeOut(animationSpec = fadeSpec) },
-                        popEnterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        popExitTransition = { fadeOut(animationSpec = fadeSpec) }
-                    ) {
-                        Text("Tela de Ajuda (Placeholder)")
-                    }
+                        enterTransition = { fadeIn(animationSpec = animationSpec) },
+                        exitTransition = { fadeOut(animationSpec = animationSpec) },
+                        popEnterTransition = { fadeIn(animationSpec = animationSpec) },
+                        popExitTransition = { fadeOut(animationSpec = animationSpec) }
+                    ) { Text("Tela de Ajuda (Placeholder)") }
 
                     composable(
                         route = Screen.Profile.route,
-                        enterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        exitTransition = { fadeOut(animationSpec = fadeSpec) },
-                        popEnterTransition = { fadeIn(animationSpec = fadeSpec) },
-                        popExitTransition = { fadeOut(animationSpec = fadeSpec) }
+                        enterTransition = { fadeIn(animationSpec = animationSpec) },
+                        exitTransition = { fadeOut(animationSpec = animationSpec) },
+                        popEnterTransition = { fadeIn(animationSpec = animationSpec) },
+                        popExitTransition = { fadeOut(animationSpec = animationSpec) }
                     ) {
                         ProfileScreen(navController = navController)
+                    }
+
+                    // NOVO DESTINO ADICIONADO
+                    composable(
+                        route = Screen.CreateTask.route,
+                        enterTransition = { fadeIn(animationSpec = animationSpec) },
+                        exitTransition = { fadeOut(animationSpec = animationSpec) },
+                        popEnterTransition = { fadeIn(animationSpec = animationSpec) },
+                        popExitTransition = { fadeOut(animationSpec = animationSpec) }
+                    ) {
+                        CreateTaskScreen(navController = navController)
                     }
                 }
             }

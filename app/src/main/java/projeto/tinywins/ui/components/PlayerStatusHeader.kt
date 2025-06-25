@@ -1,7 +1,8 @@
-package projeto.tinywins.ui.components // Pacote corrigido
+package projeto.tinywins.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,7 +36,10 @@ import projeto.tinywins.R
 import projeto.tinywins.ui.theme.TinyWinsTheme
 
 @Composable
-fun PlayerStatusHeader() {
+fun PlayerStatusHeader(
+    onClick: () -> Unit // Ação de clique para navegar
+) {
+    // Meus dados mockados para o jogador
     val playerName = "Patrick"
     val playerLevel = 1
     val health = 45f / 50f
@@ -46,7 +50,8 @@ fun PlayerStatusHeader() {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onClick), // Todo o header agora é clicável
         shape = MaterialTheme.shapes.large,
         tonalElevation = 1.dp
     ) {
@@ -75,16 +80,8 @@ fun PlayerStatusHeader() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(
-                            text = playerName,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Nível $playerLevel",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Text(text = playerName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text(text = "Nível $playerLevel", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                     }
                     Row {
                         Icon(Icons.Default.MonetizationOn, contentDescription = "Moedas", tint = Color(0xFFFFC107))
@@ -96,9 +93,7 @@ fun PlayerStatusHeader() {
                         Text(text = "$playerDiamonds", fontWeight = FontWeight.SemiBold)
                     }
                 }
-
                 Spacer(modifier = Modifier.height(12.dp))
-
                 StatusBar(label = "Saúde", progress = health, progressColor = Color(0xFFE53935), progressText = "45/50")
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusBar(label = "XP", progress = experience, progressColor = Color(0xFFFFC107), progressText = "124/500")
@@ -117,13 +112,9 @@ private fun StatusBar(label: String, progress: Float, progressColor: Color, prog
         Text(text = label, style = MaterialTheme.typography.labelMedium)
         Text(text = progressText, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
-
     LinearProgressIndicator(
         progress = { progress },
-        modifier = Modifier
-            .height(8.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp)),
+        modifier = Modifier.height(8.dp).fillMaxWidth().clip(RoundedCornerShape(4.dp)),
         color = progressColor,
         trackColor = MaterialTheme.colorScheme.surfaceVariant,
         strokeCap = StrokeCap.Round
@@ -134,14 +125,6 @@ private fun StatusBar(label: String, progress: Float, progressColor: Color, prog
 @Composable
 private fun PlayerStatusHeaderPreview() {
     TinyWinsTheme(useDarkTheme = false) {
-        PlayerStatusHeader()
-    }
-}
-
-@Preview
-@Composable
-private fun PlayerStatusHeaderDarkPreview() {
-    TinyWinsTheme(useDarkTheme = true) {
-        PlayerStatusHeader()
+        PlayerStatusHeader(onClick = {}) // Adiciona o clique vazio para o preview
     }
 }

@@ -16,13 +16,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,17 +42,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import projeto.tinywins.R
-import projeto.tinywins.ui.components.AppBottomNavigation
 import projeto.tinywins.ui.theme.TinyWinsTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavHostController) {
-    // Meus dados mockados do jogador para esta tela
     val playerName = "Patrick"
     val playerLevel = 1
     val playerHealth = 45
@@ -65,15 +63,23 @@ fun ProfileScreen(navController: NavHostController) {
         topBar = {
             TopAppBar(
                 title = { Text("Meu Perfil") },
+                // Adicionado botão de voltar
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar"
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-        },
-        bottomBar = {
-            AppBottomNavigation(navController = navController)
         }
+        // A BottomAppBar foi removida daqui
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -83,7 +89,6 @@ fun ProfileScreen(navController: NavHostController) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Seção do Avatar e Nome
             Image(
                 painter = painterResource(id = R.drawable.pixel_avatar),
                 contentDescription = "Avatar do Jogador",
@@ -107,7 +112,6 @@ fun ProfileScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Seção de Moedas e Diamantes
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -125,7 +129,6 @@ fun ProfileScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Seção de Barras de Status
             ProfileStatusBar(
                 label = "Saúde",
                 currentValue = playerHealth,
@@ -142,7 +145,6 @@ fun ProfileScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Seções Futuras (Placeholders)
             Text("TODO: Seção de Conquistas/Badges", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(16.dp))
             Text("TODO: Seção de Estatísticas", style = MaterialTheme.typography.titleMedium)
@@ -150,7 +152,6 @@ fun ProfileScreen(navController: NavHostController) {
     }
 }
 
-// Componente auxiliar para exibir moedas e diamantes
 @Composable
 private fun CurrencyDisplay(icon: ImageVector, count: Int, tint: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -165,7 +166,6 @@ private fun CurrencyDisplay(icon: ImageVector, count: Int, tint: Color) {
     }
 }
 
-// Componente auxiliar para as barras de progresso do perfil
 @Composable
 private fun ProfileStatusBar(label: String, currentValue: Int, maxValue: Int, color: Color) {
     Column {

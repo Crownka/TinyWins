@@ -1,19 +1,11 @@
 package projeto.tinywins.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +15,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import projeto.tinywins.data.TinyWinChallenge
 import projeto.tinywins.data.sampleChallenges
-import projeto.tinywins.ui.components.AppBottomNavigation
 import projeto.tinywins.ui.components.ChallengeItemCard
 import projeto.tinywins.ui.theme.TinyWinsTheme
 
@@ -40,20 +31,21 @@ fun FavoritesScreen(
                 title = { Text("Meus Favoritos") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
+                    }
+                }
             )
-        },
-        bottomBar = {
-            AppBottomNavigation(navController = navController)
         }
+        // Sem BottomAppBar aqui
     ) { innerPadding ->
         if (favoriteChallenges.isEmpty()) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -63,9 +55,7 @@ fun FavoritesScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxWidth(),
+                modifier = Modifier.padding(innerPadding).fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -93,19 +83,6 @@ fun FavoritesScreenPreview() {
         FavoritesScreen(
             navController = navController,
             favoriteChallenges = previewChallenges,
-            onChallengeClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Favorites Screen Empty")
-@Composable
-fun FavoritesScreenEmptyPreview() {
-    TinyWinsTheme(useDarkTheme = false) {
-        val navController = rememberNavController()
-        FavoritesScreen(
-            navController = navController,
-            favoriteChallenges = emptyList(),
             onChallengeClick = {}
         )
     }

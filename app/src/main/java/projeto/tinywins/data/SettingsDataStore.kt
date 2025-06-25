@@ -41,14 +41,9 @@ class SettingsDataStore(private val context: Context) {
         }
     }
 
-    // --- NOVA PREFERÊNCIA DE NOTIFICAÇÕES ---
-
-    // 1. Crio uma nova chave para a configuração de notificações.
+    // --- Preferência de Notificações (Já existente) ---
     private val ARE_NOTIFICATIONS_ENABLED_KEY = booleanPreferencesKey("are_notifications_enabled")
 
-    // 2. Crio um novo Flow para ler o estado das notificações.
-    //    O padrão será 'true', pois geralmente os usuários esperam que as notificações
-    //    venham ativadas.
     val notificationsPreferenceFlow: Flow<Boolean> = context.dataStore.data
         .catch { exception ->
             if (exception is IOException) {
@@ -58,13 +53,38 @@ class SettingsDataStore(private val context: Context) {
             }
         }
         .map { preferences ->
-            preferences[ARE_NOTIFICATIONS_ENABLED_KEY] ?: true // Padrão: ativado
+            preferences[ARE_NOTIFICATIONS_ENABLED_KEY] ?: true
         }
 
-    // 3. Crio uma nova função 'suspend' para salvar o estado das notificações.
     suspend fun saveNotificationsPreference(areEnabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[ARE_NOTIFICATIONS_ENABLED_KEY] = areEnabled
+        }
+    }
+
+    // --- NOVA PREFERÊNCIA DE ANIMAÇÕES ---
+
+    // 1. Minha nova chave para a configuração de animações.
+    private val ARE_ANIMATIONS_ENABLED_KEY = booleanPreferencesKey("are_animations_enabled")
+
+    // 2. Meu novo Flow para ler o estado das animações.
+    //    O padrão será 'true', para que as animações venham ativadas.
+    val animationsPreferenceFlow: Flow<Boolean> = context.dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            preferences[ARE_ANIMATIONS_ENABLED_KEY] ?: true // Padrão: ativado
+        }
+
+    // 3. Minha nova função 'suspend' para salvar o estado das animações.
+    suspend fun saveAnimationsPreference(areEnabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[ARE_ANIMATIONS_ENABLED_KEY] = areEnabled
         }
     }
 }

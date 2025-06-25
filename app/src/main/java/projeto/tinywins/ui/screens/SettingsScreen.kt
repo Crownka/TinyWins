@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import projeto.tinywins.ui.components.AppBottomNavigation
 import projeto.tinywins.ui.theme.TinyWinsTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +36,9 @@ fun SettingsScreen(
     currentThemeIsDark: Boolean,
     onThemeToggled: (Boolean) -> Unit,
     areNotificationsEnabled: Boolean,
-    onNotificationsToggled: (Boolean) -> Unit
+    onNotificationsToggled: (Boolean) -> Unit,
+    areAnimationsEnabled: Boolean,
+    onAnimationsToggled: (Boolean) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -56,10 +58,8 @@ fun SettingsScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-        },
-        bottomBar = {
-            AppBottomNavigation(navController = navController)
         }
+        // A BottomAppBar foi removida daqui para seguir o novo design
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -73,41 +73,32 @@ fun SettingsScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Modo Escuro",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Switch(
-                    checked = currentThemeIsDark,
-                    onCheckedChange = onThemeToggled
-                )
-            }
+            SettingSwitchItem(
+                title = "Modo Escuro",
+                isChecked = currentThemeIsDark,
+                onCheckedChange = onThemeToggled
+            )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Notificações",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Switch(
-                    checked = areNotificationsEnabled,
-                    onCheckedChange = onNotificationsToggled
-                )
-            }
+            SettingSwitchItem(
+                title = "Notificações",
+                isChecked = areNotificationsEnabled,
+                onCheckedChange = onNotificationsToggled
+            )
+
+            // O switch para Animações foi removido temporariamente
+            // já que decidimos deixá-las sempre ativadas por enquanto.
+            // Se decidir reativar, basta descomentar este bloco.
+            /*
+            SettingSwitchItem(
+                title = "Animações de Tela",
+                isChecked = areAnimationsEnabled,
+                onCheckedChange = onAnimationsToggled
+            )
+            */
 
             Spacer(modifier = Modifier.height(24.dp))
+            Divider()
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "Outras Configurações",
@@ -121,6 +112,24 @@ fun SettingsScreen(
     }
 }
 
+@Composable
+private fun SettingSwitchItem(
+    title: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = title, style = MaterialTheme.typography.bodyLarge)
+        Switch(checked = isChecked, onCheckedChange = onCheckedChange)
+    }
+}
+
 @Preview(showBackground = true, name = "Settings Screen Light")
 @Composable
 fun SettingsScreenPreviewLight() {
@@ -131,22 +140,9 @@ fun SettingsScreenPreviewLight() {
             currentThemeIsDark = false,
             onThemeToggled = {},
             areNotificationsEnabled = true,
-            onNotificationsToggled = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Settings Screen Dark")
-@Composable
-fun SettingsScreenPreviewDark() {
-    TinyWinsTheme(useDarkTheme = true) {
-        val navController = rememberNavController()
-        SettingsScreen(
-            navController = navController,
-            currentThemeIsDark = true,
-            onThemeToggled = {},
-            areNotificationsEnabled = false,
-            onNotificationsToggled = {}
+            onNotificationsToggled = {},
+            areAnimationsEnabled = true,
+            onAnimationsToggled = {}
         )
     }
 }
