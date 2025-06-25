@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import projeto.tinywins.ui.components.AppBottomNavigation
 import projeto.tinywins.ui.theme.TinyWinsTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +56,9 @@ fun SettingsScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
+        },
+        bottomBar = {
+            AppBottomNavigation(navController = navController)
         }
     ) { innerPadding ->
         Column(
@@ -69,7 +73,6 @@ fun SettingsScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // Linha para a opção de Modo Escuro
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -87,7 +90,6 @@ fun SettingsScreen(
                 )
             }
 
-            // Linha para a opção de Notificações
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

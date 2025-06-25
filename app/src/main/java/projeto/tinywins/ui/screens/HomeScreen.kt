@@ -1,12 +1,36 @@
 package projeto.tinywins.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -16,6 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import projeto.tinywins.data.TinyWinChallenge
 import projeto.tinywins.data.sampleChallenges
 import projeto.tinywins.ui.Screen
+import projeto.tinywins.ui.components.AppBottomNavigation
 import projeto.tinywins.ui.components.ChallengeItemCard
 import projeto.tinywins.ui.components.PlayerStatusHeader
 import projeto.tinywins.ui.theme.TinyWinsTheme
@@ -72,34 +97,11 @@ fun HomeScreen(
             )
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Home, "Início") },
-                    label = { Text("Início") },
-                    selected = navController.currentDestination?.route == Screen.Home.route,
-                    onClick = {
-                        if (navController.currentDestination?.route != Screen.Home.route) {
-                            navController.navigate(Screen.Home.route) { popUpTo(navController.graph.startDestinationId) { saveState = true }; launchSingleTop = true; restoreState = true }
-                        }
-                    }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Favorite, "Favoritos") },
-                    label = { Text("Favoritos") },
-                    selected = navController.currentDestination?.route == Screen.Favorites.route,
-                    onClick = { navController.navigate(Screen.Favorites.route) }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Person, "Perfil") },
-                    label = { Text("Perfil") },
-                    selected = navController.currentDestination?.route == Screen.Profile.route,
-                    onClick = { navController.navigate(Screen.Profile.route) }
-                )
-            }
+            AppBottomNavigation(navController = navController)
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* TODO */ },
+                onClick = { /* TODO: Ação para adicionar um novo desafio */ },
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             ) {
@@ -119,12 +121,19 @@ fun HomeScreen(
                 onValueChange = { searchQuery = it },
                 label = { Text("Buscar desafios...") },
                 leadingIcon = { Icon(Icons.Filled.Search, "Ícone de Busca") },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 singleLine = true
             )
 
             if (filteredChallenges.isEmpty() && searchQuery.isNotBlank()) {
-                Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text("Nenhum desafio encontrado para \"$searchQuery\"", style = MaterialTheme.typography.bodyLarge)
                 }
             } else {
