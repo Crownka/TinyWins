@@ -13,12 +13,32 @@ import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import java.util.UUID
 
-// NOVA ENUM para diferenciar os tipos de tarefa
 enum class TaskType {
-    HABIT, // Um hábito que pode ser positivo/negativo
-    TODO   // Uma tarefa com data de conclusão
+    HABIT,
+    TODO
 }
+
+enum class Difficulty {
+    TRIVIAL,
+    EASY,
+    MEDIUM,
+    HARD
+}
+
+enum class ResetFrequency {
+    DAILY,
+    WEEKLY,
+    MONTHLY
+}
+
+// NOVA DATA CLASS para um item da checklist
+data class ChecklistItem(
+    val id: String = UUID.randomUUID().toString(),
+    var text: String,
+    var isCompleted: Boolean = false
+)
 
 enum class ChallengeCategory {
     SAUDE,
@@ -35,26 +55,30 @@ data class TinyWinChallenge(
     val id: String,
     val title: String,
     val description: String,
-
-    // Adiciono o novo campo 'type' para saber se é Hábito ou TODO
     val type: TaskType,
-
     val xp: Int,
     val coins: Int,
     val diamonds: Int = 0,
+    val difficulty: Difficulty = Difficulty.EASY,
+    val isPositive: Boolean = true,
+    val isNegative: Boolean = false,
+    val resetFrequency: ResetFrequency? = ResetFrequency.DAILY,
+    val dueDate: Long? = null,
+    val reminders: List<Long> = emptyList(),
+
+    // NOVO CAMPO para a lista de subtarefas
+    val checklist: List<ChecklistItem> = emptyList(),
 
     val category: ChallengeCategory,
     @DrawableRes val imageResId: Int?,
     var isCompleted: Boolean = false,
     var isFavorite: Boolean = false,
-
     val quantifiable: Boolean = false,
     var currentProgress: Int = 0,
     val targetProgress: Int = 1,
-    val pointsPerUnit: Int = 0 // Manteremos por enquanto
+    val pointsPerUnit: Int = 0
 )
 
-// As funções de extensão toColor() e toIcon permanecem iguais
 @Composable
 fun ChallengeCategory.toColor(): Color {
     return when (this) {

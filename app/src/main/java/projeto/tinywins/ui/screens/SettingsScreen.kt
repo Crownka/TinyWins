@@ -1,25 +1,9 @@
 package projeto.tinywins.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,10 +30,7 @@ fun SettingsScreen(
                 title = { Text("Configurações") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -59,7 +40,6 @@ fun SettingsScreen(
                 )
             )
         }
-        // A BottomAppBar foi removida daqui para seguir o novo design
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -67,44 +47,21 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Preferências Gerais",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
+            Text(text = "Preferências Gerais", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
             SettingSwitchItem(
                 title = "Modo Escuro",
                 isChecked = currentThemeIsDark,
                 onCheckedChange = onThemeToggled
             )
-
             SettingSwitchItem(
                 title = "Notificações",
                 isChecked = areNotificationsEnabled,
                 onCheckedChange = onNotificationsToggled
             )
-
-            // O switch para Animações foi removido temporariamente
-            // já que decidimos deixá-las sempre ativadas por enquanto.
-            // Se decidir reativar, basta descomentar este bloco.
-            /*
-            SettingSwitchItem(
-                title = "Animações de Tela",
-                isChecked = areAnimationsEnabled,
-                onCheckedChange = onAnimationsToggled
-            )
-            */
-
             Spacer(modifier = Modifier.height(24.dp))
             Divider()
             Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Outras Configurações",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Text(text = "Outras Configurações", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
             Text("TODO: Botão Limpar Favoritos", style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
             Text("TODO: Botão Redefinir Preferências", style = MaterialTheme.typography.bodyLarge)
@@ -119,9 +76,7 @@ private fun SettingSwitchItem(
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -130,7 +85,7 @@ private fun SettingSwitchItem(
     }
 }
 
-@Preview(showBackground = true, name = "Settings Screen Light")
+@Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreviewLight() {
     TinyWinsTheme(useDarkTheme = false) {

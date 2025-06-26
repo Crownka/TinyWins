@@ -41,7 +41,6 @@ fun FavoritesScreen(
                 }
             )
         }
-        // Sem BottomAppBar aqui
     ) { innerPadding ->
         if (favoriteChallenges.isEmpty()) {
             Box(
@@ -63,8 +62,11 @@ fun FavoritesScreen(
                     ChallengeItemCard(
                         challenge = challenge,
                         onClick = { onChallengeClick(challenge) },
-                        onCompleteClick = {
-                            println("Completar desafio favorito: ${challenge.title}")
+                        onPositiveAction = { println("Ação POSITIVA para favorito: ${challenge.title}") },
+                        onNegativeAction = { println("Ação NEGATIVA para favorito: ${challenge.title}") },
+                        onTodoChecked = { isChecked ->
+                            challenge.isCompleted = isChecked
+                            println("TODO favorito '${challenge.title}' marcado como: $isChecked")
                         },
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )

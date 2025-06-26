@@ -3,13 +3,17 @@ package projeto.tinywins.data
 import androidx.compose.runtime.mutableStateListOf
 import java.util.UUID
 
-// Lista de desafios mockados com o novo campo 'type'
+// Lista de desafios mockados com todos os novos campos da data class
 val sampleChallenges = mutableStateListOf(
+    // --- Hábitos ---
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
         title = "Beber 8 copos d'água",
         description = "Mantenha-se hidratado bebendo pelo menos 8 copos (aprox. 2 litros) de água.",
-        type = TaskType.HABIT, // Classificado
+        type = TaskType.HABIT,
+        difficulty = Difficulty.EASY,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
         xp = 10,
         coins = 5,
         category = ChallengeCategory.SAUDE,
@@ -24,7 +28,10 @@ val sampleChallenges = mutableStateListOf(
         id = UUID.randomUUID().toString(),
         title = "Ler por 15 minutos",
         description = "Dedique 15 minutos do seu dia para a leitura de um livro ou artigo.",
-        type = TaskType.HABIT, // Classificado
+        type = TaskType.HABIT,
+        difficulty = Difficulty.EASY,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
         xp = 20,
         coins = 10,
         category = ChallengeCategory.APRENDIZADO,
@@ -37,35 +44,12 @@ val sampleChallenges = mutableStateListOf(
     ),
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
-        title = "Caminhada de 10 minutos",
-        description = "Faça uma pequena pausa para uma caminhada de 10 minutos.",
-        type = TaskType.HABIT, // Classificado
-        xp = 15,
-        coins = 5,
-        category = ChallengeCategory.SAUDE,
-        imageResId = null,
-        isFavorite = false,
-        quantifiable = true,
-        currentProgress = 0,
-        targetProgress = 10
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Planejar o dia seguinte",
-        description = "Antes de dormir, liste as 3 principais tarefas para amanhã.",
-        type = TaskType.TODO, // Classificado como uma tarefa única
-        xp = 25,
-        coins = 10,
-        category = ChallengeCategory.PRODUTIVIDADE,
-        imageResId = null,
-        isFavorite = false,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
         title = "3 Coisas para Agradecer",
         description = "Pratique a gratidão listando três coisas boas do seu dia.",
-        type = TaskType.HABIT, // Classificado
+        type = TaskType.HABIT,
+        difficulty = Difficulty.TRIVIAL,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
         xp = 10,
         coins = 5,
         category = ChallengeCategory.AUTOCONHECIMENTO,
@@ -75,9 +59,150 @@ val sampleChallenges = mutableStateListOf(
     ),
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
+        title = "Meditar por 5 minutos",
+        description = "Encontre um lugar calmo e concentre-se na sua respiração.",
+        type = TaskType.HABIT,
+        difficulty = Difficulty.EASY,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
+        xp = 15,
+        coins = 10,
+        category = ChallengeCategory.AUTOCONHECIMENTO,
+        imageResId = null,
+        isFavorite = false,
+        quantifiable = true,
+        currentProgress = 0,
+        targetProgress = 5
+    ),
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
+        title = "Evitar refrigerante hoje",
+        description = "Opte por bebidas mais saudáveis ao longo do dia.",
+        type = TaskType.HABIT,
+        difficulty = Difficulty.MEDIUM,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
+        xp = 20,
+        coins = 15,
+        diamonds = 1,
+        category = ChallengeCategory.SAUDE,
+        imageResId = null,
+        isFavorite = false,
+        quantifiable = false
+    ),
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
+        title = "Arrumar a cama pela manhã",
+        description = "Comece o dia com uma pequena tarefa concluída.",
+        type = TaskType.HABIT,
+        difficulty = Difficulty.TRIVIAL,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
+        xp = 5,
+        coins = 5,
+        category = ChallengeCategory.ORGANIZACAO,
+        imageResId = null,
+        isFavorite = true,
+        quantifiable = false
+    ),
+    // --- TODOs (Tarefas únicas) ---
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
+        title = "Planejar o dia seguinte",
+        description = "Antes de dormir, liste as 3 principais tarefas para amanhã.",
+        type = TaskType.TODO,
+        difficulty = Difficulty.EASY,
+        dueDate = null, // TODOs podem ter uma data de entrega
+        xp = 25,
+        coins = 10,
+        category = ChallengeCategory.PRODUTIVIDADE,
+        imageResId = null,
+        isFavorite = false,
+        quantifiable = false
+    ),
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
+        title = "Organizar a Mesa de Trabalho",
+        description = "Um ambiente limpo ajuda na concentração. Organize sua mesa.",
+        type = TaskType.TODO,
+        difficulty = Difficulty.MEDIUM,
+        dueDate = null,
+        xp = 10,
+        coins = 10,
+        category = ChallengeCategory.ORGANIZACAO,
+        imageResId = null,
+        isFavorite = false,
+        quantifiable = false
+    ),
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
+        title = "Enviar mensagem para um amigo",
+        description = "Fortaleça laços. Mande uma mensagem para um amigo ou familiar.",
+        type = TaskType.TODO,
+        difficulty = Difficulty.EASY,
+        dueDate = null,
+        xp = 10,
+        coins = 5,
+        category = ChallengeCategory.SOCIAL,
+        imageResId = null,
+        isFavorite = false,
+        quantifiable = false
+    ),
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
+        title = "Anotar gastos do dia",
+        description = "Mantenha o controle financeiro anotando todas as suas despesas de hoje.",
+        type = TaskType.TODO,
+        difficulty = Difficulty.EASY,
+        dueDate = null,
+        xp = 15,
+        coins = 10,
+        category = ChallengeCategory.FINANCAS,
+        imageResId = null,
+        isFavorite = false,
+        quantifiable = false
+    ),
+    // Recoloquei alguns desafios que sumiram para termos mais variedade
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
+        title = "Fazer uma pausa sem telas",
+        description = "Descanse os olhos e a mente por 10 minutos longe de telas.",
+        type = TaskType.HABIT,
+        difficulty = Difficulty.EASY,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
+        xp = 15,
+        coins = 5,
+        category = ChallengeCategory.AUTOCONHECIMENTO,
+        imageResId = null,
+        isFavorite = false,
+        quantifiable = true,
+        currentProgress = 0,
+        targetProgress = 10
+    ),
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
+        title = "Aprender uma palavra nova",
+        description = "Expanda seu vocabulário aprendendo o significado de uma palavra nova.",
+        type = TaskType.HABIT,
+        difficulty = Difficulty.TRIVIAL,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
+        xp = 10,
+        coins = 5,
+        category = ChallengeCategory.APRENDIZADO,
+        imageResId = null,
+        isFavorite = false,
+        quantifiable = false
+    ),
+    TinyWinChallenge(
+        id = UUID.randomUUID().toString(),
         title = "10 minutos de Alongamento",
         description = "Faça uma pausa para se alongar e relaxar os músculos.",
-        type = TaskType.HABIT, // Classificado
+        type = TaskType.HABIT,
+        difficulty = Difficulty.EASY,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
         xp = 15,
         coins = 5,
         category = ChallengeCategory.SAUDE,
@@ -91,7 +216,10 @@ val sampleChallenges = mutableStateListOf(
         id = UUID.randomUUID().toString(),
         title = "Desenhar por 10 minutos",
         description = "Solte sua criatividade desenhando o que vier à mente.",
-        type = TaskType.HABIT, // Classificado
+        type = TaskType.HABIT,
+        difficulty = Difficulty.MEDIUM,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
         xp = 20,
         coins = 15,
         category = ChallengeCategory.CRIATIVIDADE,
@@ -103,103 +231,19 @@ val sampleChallenges = mutableStateListOf(
     ),
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
-        title = "Meditar por 5 minutos",
-        description = "Encontre um lugar calmo e concentre-se na sua respiração.",
-        type = TaskType.HABIT, // Classificado
+        title = "Caminhada de 10 minutos",
+        description = "Faça uma pequena pausa para uma caminhada de 10 minutos.",
+        type = TaskType.HABIT,
+        difficulty = Difficulty.EASY,
+        resetFrequency = ResetFrequency.DAILY,
+        isPositive = true,
         xp = 15,
-        coins = 10,
-        category = ChallengeCategory.AUTOCONHECIMENTO,
-        imageResId = null,
-        isFavorite = false,
-        quantifiable = true,
-        currentProgress = 0,
-        targetProgress = 5
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Organizar a Mesa de Trabalho",
-        description = "Um ambiente limpo ajuda na concentração. Organize sua mesa.",
-        type = TaskType.TODO, // Classificado como uma tarefa única
-        xp = 10,
-        coins = 10,
-        category = ChallengeCategory.ORGANIZACAO,
-        imageResId = null,
-        isFavorite = false,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Enviar mensagem para um amigo",
-        description = "Fortaleça laços. Mande uma mensagem para um amigo ou familiar.",
-        type = TaskType.TODO, // Classificado como uma tarefa única
-        xp = 10,
         coins = 5,
-        category = ChallengeCategory.SOCIAL,
-        imageResId = null,
-        isFavorite = false,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Aprender uma palavra nova",
-        description = "Expanda seu vocabulário aprendendo o significado de uma palavra nova.",
-        type = TaskType.HABIT, // Classificado
-        xp = 10,
-        coins = 5,
-        category = ChallengeCategory.APRENDIZADO,
-        imageResId = null,
-        isFavorite = false,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Evitar refrigerante hoje",
-        description = "Opte por bebidas mais saudáveis ao longo do dia.",
-        type = TaskType.HABIT, // Classificado
-        xp = 20,
-        coins = 15,
-        diamonds = 1,
         category = ChallengeCategory.SAUDE,
-        imageResId = null,
-        isFavorite = false,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Anotar gastos do dia",
-        description = "Mantenha o controle financeiro anotando todas as suas despesas de hoje.",
-        type = TaskType.TODO, // Classificado como uma tarefa única
-        xp = 15,
-        coins = 10,
-        category = ChallengeCategory.FINANCAS,
-        imageResId = null,
-        isFavorite = false,
-        quantifiable = false
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Fazer uma pausa sem telas",
-        description = "Descanse os olhos e a mente por 10 minutos longe de telas.",
-        type = TaskType.HABIT, // Classificado
-        xp = 15,
-        coins = 5,
-        category = ChallengeCategory.AUTOCONHECIMENTO,
         imageResId = null,
         isFavorite = false,
         quantifiable = true,
         currentProgress = 0,
         targetProgress = 10
-    ),
-    TinyWinChallenge(
-        id = UUID.randomUUID().toString(),
-        title = "Arrumar a cama pela manhã",
-        description = "Comece o dia com uma pequena tarefa concluída.",
-        type = TaskType.HABIT, // Classificado
-        xp = 5,
-        coins = 5,
-        category = ChallengeCategory.ORGANIZACAO,
-        imageResId = null,
-        isFavorite = true,
-        quantifiable = false
     )
 )

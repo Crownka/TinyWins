@@ -2,16 +2,7 @@ package projeto.tinywins.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -19,17 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,13 +44,9 @@ fun ProfileScreen(navController: NavHostController) {
         topBar = {
             TopAppBar(
                 title = { Text("Meu Perfil") },
-                // Adicionado botão de voltar
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -79,7 +56,6 @@ fun ProfileScreen(navController: NavHostController) {
                 )
             )
         }
-        // A BottomAppBar foi removida daqui
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -109,9 +85,7 @@ fun ProfileScreen(navController: NavHostController) {
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary
             )
-
             Spacer(modifier = Modifier.height(24.dp))
-
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -126,9 +100,7 @@ fun ProfileScreen(navController: NavHostController) {
                     CurrencyDisplay(icon = Icons.Default.Diamond, count = playerDiamonds, tint = Color(0xFF4FC3F7))
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             ProfileStatusBar(
                 label = "Saúde",
                 currentValue = playerHealth,
@@ -142,9 +114,7 @@ fun ProfileScreen(navController: NavHostController) {
                 maxValue = playerNextLevelXp,
                 color = Color(0xFFFFC107)
             )
-
             Spacer(modifier = Modifier.height(24.dp))
-
             Text("TODO: Seção de Conquistas/Badges", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(16.dp))
             Text("TODO: Seção de Estatísticas", style = MaterialTheme.typography.titleMedium)

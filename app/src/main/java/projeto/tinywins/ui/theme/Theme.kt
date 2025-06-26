@@ -2,14 +2,14 @@ package projeto.tinywins.ui.theme
 
 import android.os.Build
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-// Esquema de Cores para o Tema Claro (Agora completo)
+// Esquema de Cores para o Tema Claro
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
@@ -33,10 +33,10 @@ private val LightColors = lightColorScheme(
     onSurface = md_theme_light_onSurface,
     surfaceVariant = md_theme_light_surfaceVariant,
     onSurfaceVariant = md_theme_light_onSurfaceVariant,
-    outline = md_theme_light_outline
+    outline = md_theme_light_outline,
 )
 
-// Esquema de Cores para o Tema Escuro (Agora completo)
+// Esquema de Cores para o Tema Escuro
 private val DarkColors = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
@@ -60,12 +60,12 @@ private val DarkColors = darkColorScheme(
     onSurface = md_theme_dark_onSurface,
     surfaceVariant = md_theme_dark_surfaceVariant,
     onSurfaceVariant = md_theme_dark_onSurfaceVariant,
-    outline = md_theme_dark_outline
+    outline = md_theme_dark_outline,
 )
 
 @Composable
 fun TinyWinsTheme(
-    useDarkTheme: Boolean,
+    useDarkTheme: Boolean, // Parâmetro para controlar o tema
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -74,14 +74,15 @@ fun TinyWinsTheme(
             val context = LocalContext.current
             if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         useDarkTheme -> DarkColors
         else -> LightColors
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AppTypography,
-        shapes = AppShapes,
+        typography = AppTypography, // Do seu Typography.kt (M3)
+        shapes = AppShapes,         // Do seu Shapes.kt (M3)
         content = content
     )
 }

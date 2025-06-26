@@ -37,9 +37,8 @@ import projeto.tinywins.ui.theme.TinyWinsTheme
 
 @Composable
 fun PlayerStatusHeader(
-    onClick: () -> Unit // Ação de clique para navegar
+    onClick: () -> Unit
 ) {
-    // Meus dados mockados para o jogador
     val playerName = "Patrick"
     val playerLevel = 1
     val health = 45f / 50f
@@ -51,7 +50,7 @@ fun PlayerStatusHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick), // Todo o header agora é clicável
+            .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.large,
         tonalElevation = 1.dp
     ) {
@@ -125,6 +124,6 @@ private fun StatusBar(label: String, progress: Float, progressColor: Color, prog
 @Composable
 private fun PlayerStatusHeaderPreview() {
     TinyWinsTheme(useDarkTheme = false) {
-        PlayerStatusHeader(onClick = {}) // Adiciona o clique vazio para o preview
+        PlayerStatusHeader(onClick = {})
     }
 }
