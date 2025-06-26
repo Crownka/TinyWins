@@ -36,8 +36,10 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -47,12 +49,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import projeto.tinywins.data.ChallengeCategory // IMPORTAÇÃO ADICIONADA
+import projeto.tinywins.data.AlarmScheduler
+import projeto.tinywins.data.ChallengeCategory
 import projeto.tinywins.data.ChecklistItem
 import projeto.tinywins.data.Difficulty
 import projeto.tinywins.data.ResetFrequency
@@ -61,10 +66,49 @@ import projeto.tinywins.data.TinyWinChallenge
 import projeto.tinywins.data.sampleChallenges
 import projeto.tinywins.ui.theme.TinyWinsTheme
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerDialog(
+    onDismissRequest: () -> Unit,
+    onConfirm: (Calendar) -> Unit,
+    title: String = "Selecione o Horário"
+) {
+    val timeState = rememberTimePickerState(is24Hour = true)
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card(
+            shape = MaterialTheme.shapes.extraLarge
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = title, style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                TimePicker(state = timeState)
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismissRequest) {
+                        Text("Cancelar")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(onClick = {
+                        val cal = Calendar.getInstance()
+                        cal.set(Calendar.HOUR_OF_DAY, timeState.hour)
+                        cal.set(Calendar.MINUTE, timeState.minute)
+                        cal.isLenient = false
+                        onConfirm(cal)
+                    }) {
+                        Text("OK")
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +123,10 @@ fun CreateTaskScreen(navController: NavHostController) {
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
     val checklistItems = remember { mutableStateListOf<ChecklistItem>() }
+    val reminders = remember { mutableStateListOf<Long>() }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val alarmScheduler = remember { AlarmScheduler(context) }
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState()
@@ -103,6 +151,22 @@ fun CreateTaskScreen(navController: NavHostController) {
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+
+    if (showTimePicker) {
+        TimePickerDialog(
+            onDismissRequest = { showTimePicker = false },
+            onConfirm = { calendar ->
+                val finalDateTime = Calendar.getInstance()
+                selectedDateMillis?.let {
+                    finalDateTime.timeInMillis = it
+                }
+                finalDateTime.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
+                finalDateTime.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
+                reminders.add(finalDateTime.timeInMillis)
+                showTimePicker = false
+            }
+        )
     }
 
     Scaffold(
@@ -142,9 +206,16 @@ fun CreateTaskScreen(navController: NavHostController) {
                                 resetFrequency = if (selectedTaskType == TaskType.HABIT) selectedFrequency else null,
                                 dueDate = if (selectedTaskType == TaskType.TODO) selectedDateMillis else null,
                                 checklist = if (selectedTaskType == TaskType.TODO) checklistItems.toList() else emptyList(),
+                                reminders = reminders.toList(),
                                 category = ChallengeCategory.PRODUTIVIDADE,
                                 imageResId = null
                             )
+
+                            if (newChallenge.type == TaskType.TODO && newChallenge.reminders.isNotEmpty()) {
+                                newChallenge.reminders.forEach { reminderTime ->
+                                    alarmScheduler.schedule(newChallenge, reminderTime)
+                                }
+                            }
                             sampleChallenges.add(0, newChallenge)
                             navController.popBackStack()
                         },
@@ -184,9 +255,7 @@ fun CreateTaskScreen(navController: NavHostController) {
                     value = notes,
                     onValueChange = { notes = it },
                     label = { Text("Notas") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
+                    modifier = Modifier.fillMaxWidth().height(120.dp)
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Text("Dificuldade", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -221,7 +290,10 @@ fun CreateTaskScreen(navController: NavHostController) {
                         checklistItems = checklistItems,
                         onChecklistItemAdded = { checklistItems.add(ChecklistItem(text = "")) },
                         onChecklistItemChanged = { index, newText -> checklistItems[index] = checklistItems[index].copy(text = newText) },
-                        onChecklistItemRemoved = { index -> checklistItems.removeAt(index) }
+                        onChecklistItemRemoved = { index -> checklistItems.removeAt(index) },
+                        reminders = reminders,
+                        onAddReminderClick = { showTimePicker = true },
+                        onRemoveReminderClick = { index -> reminders.removeAt(index) }
                     )
                 }
             }
@@ -268,7 +340,10 @@ private fun TodoOptions(
     checklistItems: SnapshotStateList<ChecklistItem>,
     onChecklistItemAdded: () -> Unit,
     onChecklistItemChanged: (Int, String) -> Unit,
-    onChecklistItemRemoved: (Int) -> Unit
+    onChecklistItemRemoved: (Int) -> Unit,
+    reminders: List<Long>,
+    onAddReminderClick: () -> Unit,
+    onRemoveReminderClick: (Int) -> Unit
 ) {
     Column {
         Text("Agendamento", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -312,12 +387,30 @@ private fun TodoOptions(
             Text("Adicionar item")
         }
         Spacer(modifier = Modifier.height(24.dp))
-        Text("TODO: Lembretes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text("Lembretes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        reminders.forEachIndexed { index, millis ->
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(text = formatTime(millis), modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+                IconButton(onClick = { onRemoveReminderClick(index) }) {
+                    Icon(Icons.Default.Close, contentDescription = "Remover Lembrete")
+                }
+            }
+        }
+        TextButton(onClick = onAddReminderClick) {
+            Icon(Icons.Default.Add, contentDescription = "Adicionar Lembrete", modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Adicionar lembrete")
+        }
     }
 }
 
 private fun formatDate(millis: Long): String {
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return formatter.format(Date(millis))
+}
+
+private fun formatTime(millis: Long): String {
+    val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
     return formatter.format(Date(millis))
 }
 

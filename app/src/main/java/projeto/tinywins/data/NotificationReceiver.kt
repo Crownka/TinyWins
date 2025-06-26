@@ -11,14 +11,19 @@ import projeto.tinywins.R
 
 class NotificationReceiver : BroadcastReceiver() {
 
-    // A função onReceive é chamada pelo Android quando o alarme dispara.
-    override fun onReceive(context: Context, intent: Intent) {
-        val title = intent.getStringExtra("EXTRA_TITLE") ?: "Lembrete de Tarefa!"
-        val message = intent.getStringExtra("EXTRA_MESSAGE") ?: "Não se esqueça do seu desafio."
-        // Usamos o ID do desafio (convertido para Int) como ID da notificação.
-        val notificationId = intent.getIntExtra("EXTRA_ID", 0)
+    // As constantes para a notificação são definidas aqui
+    companion object {
+        const val EXTRA_TITLE = "EXTRA_TITLE"
+        const val EXTRA_MESSAGE = "EXTRA_MESSAGE"
+        const val NOTIFICATION_ID = "NOTIFICATION_ID"
+    }
 
-        println("ALARM RECEIVED: Tentando mostrar notificação para '$title'")
+    override fun onReceive(context: Context, intent: Intent) {
+        val title = intent.getStringExtra(EXTRA_TITLE) ?: "Seu Desafio te Espera!"
+        val message = intent.getStringExtra(EXTRA_MESSAGE) ?: "Não se esqueça de completar sua meta de hoje."
+        val notificationId = intent.getIntExtra(NOTIFICATION_ID, 0)
+
+        println("ALARM RECEIVED: Tentando mostrar notificação ID: $notificationId para: $title")
 
         showNotification(context, notificationId, title, message)
     }
@@ -29,12 +34,11 @@ class NotificationReceiver : BroadcastReceiver() {
         val channelId = "tiny_wins_reminders_channel"
         val channelName = "Lembretes de Desafios"
 
-        // Para Android 8.0+, é obrigatório criar um Canal de Notificação.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
                 channelName,
-                NotificationManager.IMPORTANCE_HIGH // IMPORTANTE: Prioridade alta para o canal.
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Canal para lembretes de hábitos e tarefas."
             }
@@ -42,11 +46,11 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // IMPORTANTE: Verifique se este ícone existe.
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_HIGH) // Prioridade alta para a notificação.
-            .setAutoCancel(true) // A notificação some ao ser clicada.
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
             .build()
 
         notificationManager.notify(notificationId, notification)

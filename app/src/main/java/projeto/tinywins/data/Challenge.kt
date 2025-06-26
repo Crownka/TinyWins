@@ -33,7 +33,6 @@ enum class ResetFrequency {
     MONTHLY
 }
 
-// NOVA DATA CLASS para um item da checklist
 data class ChecklistItem(
     val id: String = UUID.randomUUID().toString(),
     var text: String,
@@ -65,10 +64,7 @@ data class TinyWinChallenge(
     val resetFrequency: ResetFrequency? = ResetFrequency.DAILY,
     val dueDate: Long? = null,
     val reminders: List<Long> = emptyList(),
-
-    // NOVO CAMPO para a lista de subtarefas
     val checklist: List<ChecklistItem> = emptyList(),
-
     val category: ChallengeCategory,
     @DrawableRes val imageResId: Int?,
     var isCompleted: Boolean = false,
