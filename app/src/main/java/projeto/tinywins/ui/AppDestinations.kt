@@ -13,5 +13,5 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings_screen")
     data object Help : Screen("help_screen")
     data object Profile : Screen("profile_screen")
-    data object CreateTask : Screen("create_task_screen") // NOVA ROTA
+    data object CreateTask : Screen("create_task_screen")
 }

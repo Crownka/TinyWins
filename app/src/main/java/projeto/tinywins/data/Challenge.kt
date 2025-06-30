@@ -3,35 +3,15 @@ package projeto.tinywins.data
 import androidx.annotation.DrawableRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Brush
-import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import java.util.UUID
 
-enum class TaskType {
-    HABIT,
-    TODO
-}
-
-enum class Difficulty {
-    TRIVIAL,
-    EASY,
-    MEDIUM,
-    HARD
-}
-
-enum class ResetFrequency {
-    DAILY,
-    WEEKLY,
-    MONTHLY
-}
+enum class TaskType { HABIT, TODO }
+enum class Difficulty { TRIVIAL, EASY, MEDIUM, HARD }
+enum class ResetFrequency { DAILY, WEEKLY, MONTHLY }
 
 data class ChecklistItem(
     val id: String = UUID.randomUUID().toString(),
@@ -40,14 +20,8 @@ data class ChecklistItem(
 )
 
 enum class ChallengeCategory {
-    SAUDE,
-    PRODUTIVIDADE,
-    CRIATIVIDADE,
-    APRENDIZADO,
-    AUTOCONHECIMENTO,
-    SOCIAL,
-    FINANCAS,
-    ORGANIZACAO
+    SAUDE, PRODUTIVIDADE, CRIATIVIDADE, APRENDIZADO,
+    AUTOCONHECIMENTO, SOCIAL, FINANCAS, ORGANIZACAO
 }
 
 data class TinyWinChallenge(

@@ -1,16 +1,41 @@
 package projeto.tinywins.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import projeto.tinywins.data.sampleChallenges
 import projeto.tinywins.ui.theme.TinyWinsTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,6 +49,38 @@ fun SettingsScreen(
     areAnimationsEnabled: Boolean,
     onAnimationsToggled: (Boolean) -> Unit
 ) {
+    // Estado para controlar a visibilidade do diálogo de confirmação
+    var showClearFavoritesDialog by remember { mutableStateOf(false) }
+
+    // Diálogo de confirmação para limpar os favoritos
+    if (showClearFavoritesDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearFavoritesDialog = false },
+            title = { Text("Confirmar Ação") },
+            text = { Text("Você tem certeza que deseja remover todos os seus desafios favoritos? Esta ação não pode ser desfeita.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Lógica para limpar os favoritos
+                        sampleChallenges.forEach { challenge ->
+                            if (challenge.isFavorite) {
+                                challenge.isFavorite = false
+                            }
+                        }
+                        showClearFavoritesDialog = false
+                    }
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearFavoritesDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -47,7 +104,7 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            Text(text = "Preferências Gerais", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+            Text("Preferências Gerais", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
             SettingSwitchItem(
                 title = "Modo Escuro",
                 isChecked = currentThemeIsDark,
@@ -58,13 +115,26 @@ fun SettingsScreen(
                 isChecked = areNotificationsEnabled,
                 onCheckedChange = onNotificationsToggled
             )
+            // O switch de animações foi removido da UI, mas a lógica permanece no MainActivity
+            // para manter as animações sempre ativas (por enquanto)
+
             Spacer(modifier = Modifier.height(24.dp))
             Divider()
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Outras Configurações", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
-            Text("TODO: Botão Limpar Favoritos", style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("TODO: Botão Redefinir Preferências", style = MaterialTheme.typography.bodyLarge)
+
+            Text("Gerenciamento de Dados", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+
+            // BOTÃO "LIMPAR FAVORITOS"
+            Button(
+                onClick = { showClearFavoritesDialog = true }, // Abre o diálogo
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            ) {
+                Text("Limpar Todos os Favoritos")
+            }
         }
     }
 }
@@ -76,7 +146,9 @@ private fun SettingSwitchItem(
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

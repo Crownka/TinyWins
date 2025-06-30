@@ -81,8 +81,8 @@ fun TinyWinsTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AppTypography, // Do seu Typography.kt (M3)
-        shapes = AppShapes,         // Do seu Shapes.kt (M3)
+        typography = AppTypography,
+        shapes = AppShapes,
         content = content
     )
 }

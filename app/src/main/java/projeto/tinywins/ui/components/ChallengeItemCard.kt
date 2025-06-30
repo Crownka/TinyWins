@@ -1,32 +1,14 @@
 package projeto.tinywins.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,14 +29,13 @@ import projeto.tinywins.ui.theme.TinyWinsTheme
 fun ChallengeItemCard(
     challenge: TinyWinChallenge,
     onClick: () -> Unit,
-    onPositiveAction: () -> Unit,
-    onNegativeAction: () -> Unit,
-    onTodoChecked: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onPositiveAction: (() -> Unit)? = null,
+    onNegativeAction: (() -> Unit)? = null,
+    onTodoChecked: ((Boolean) -> Unit)? = null,
+    onUnfavoriteClick: (() -> Unit)? = null
 ) {
-    // Estado local para controlar o checkbox de um TODO
     var isTodoChecked by remember(challenge.id, challenge.isCompleted) { mutableStateOf(challenge.isCompleted) }
-
     val cardAlpha = if (isTodoChecked && challenge.type == TaskType.TODO) 0.6f else 1f
     val textDecoration = if (isTodoChecked && challenge.type == TaskType.TODO) TextDecoration.LineThrough else TextDecoration.None
 
@@ -72,60 +53,69 @@ fun ChallengeItemCard(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.height(IntrinsicSize.Min)
         ) {
-            // Lógica para mostrar interação de HÁBITO (+)
-            if (challenge.type == TaskType.HABIT) {
-                IconButton(onClick = onPositiveAction, modifier = Modifier.padding(start = 4.dp)) {
-                    Icon(Icons.Default.Add, "Positivo", tint = MaterialTheme.colorScheme.primary)
+            // Lógica modificada para o ícone da esquerda
+            if (onUnfavoriteClick == null) { // Só mostra o ícone esquerdo se NÃO for a tela de favoritos
+                when {
+                    challenge.type == TaskType.HABIT && onPositiveAction != null -> {
+                        IconButton(onClick = onPositiveAction, modifier = Modifier.padding(start = 4.dp)) {
+                            Icon(Icons.Default.Add, "Positivo", tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                    challenge.type == TaskType.TODO && onTodoChecked != null -> {
+                        Checkbox(
+                            checked = isTodoChecked,
+                            onCheckedChange = {
+                                isTodoChecked = it
+                                onTodoChecked(it)
+                            },
+                            modifier = Modifier.padding(start = 12.dp)
+                        )
+                    }
+                    else -> {
+                        Icon(
+                            imageVector = challenge.category.toIcon,
+                            contentDescription = "Categoria",
+                            modifier = Modifier.padding(start = 16.dp),
+                            tint = challenge.category.toColor().copy(alpha = cardAlpha)
+                        )
+                    }
                 }
-            }
-            // Para TODOs, mostramos um Checkbox
-            if (challenge.type == TaskType.TODO) {
-                Checkbox(
-                    checked = isTodoChecked,
-                    onCheckedChange = {
-                        isTodoChecked = it
-                        onTodoChecked(it)
-                    },
-                    modifier = Modifier.padding(start = 12.dp)
-                )
+            } else {
+                Spacer(modifier = Modifier.width(48.dp)) // Espaço para alinhar o texto
             }
 
-            // Conteúdo Central (Ícone, Título, XP)
-            Row(
+            Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(vertical = 12.dp, horizontal = 12.dp)
             ) {
-                Icon(
-                    imageVector = challenge.category.toIcon,
-                    contentDescription = "Categoria",
-                    modifier = Modifier.padding(end = 8.dp),
-                    tint = challenge.category.toColor().copy(alpha = cardAlpha)
+                Text(
+                    text = challenge.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = textDecoration,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = cardAlpha)
                 )
-                Column(modifier = Modifier.padding(vertical = 12.dp)) {
-                    Text(
-                        text = challenge.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        textDecoration = textDecoration,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = cardAlpha)
-                    )
-                    Text(
-                        text = "${challenge.xp} XP",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFFFC107).copy(alpha = cardAlpha),
-                        fontWeight = FontWeight.SemiBold,
-                        textDecoration = textDecoration
-                    )
-                }
+                Text(
+                    text = "${challenge.xp} XP",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFFFFC107).copy(alpha = cardAlpha),
+                    fontWeight = FontWeight.SemiBold,
+                    textDecoration = textDecoration
+                )
             }
 
-            // Lógica para mostrar interação de HÁBITO (-)
-            if (challenge.type == TaskType.HABIT) {
+            // O ícone de unfavorite (coração partido) permanece à direita
+            if (onUnfavoriteClick != null) {
+                IconButton(onClick = onUnfavoriteClick, modifier = Modifier.padding(end = 4.dp)) {
+                    Icon(Icons.Default.HeartBroken, "Remover Favorito", tint = MaterialTheme.colorScheme.error)
+                }
+            } else if (challenge.type == TaskType.HABIT && onNegativeAction != null) {
                 IconButton(onClick = onNegativeAction, modifier = Modifier.padding(end = 4.dp)) {
                     Icon(Icons.Default.Remove, "Negativo", tint = MaterialTheme.colorScheme.error)
                 }
+            } else {
+                Spacer(modifier = Modifier.width(48.dp))
             }
         }
     }
@@ -139,23 +129,6 @@ private fun HabitItemCardPreview() {
         Box(modifier = Modifier.padding(16.dp)) {
             ChallengeItemCard(
                 challenge = habit,
-                onClick = {},
-                onPositiveAction = {},
-                onNegativeAction = {},
-                onTodoChecked = {}
-            )
-        }
-    }
-}
-
-@Preview(name = "TODO Card Preview")
-@Composable
-private fun TodoItemCardPreview() {
-    val todo = sampleChallenges.first { it.type == TaskType.TODO }
-    TinyWinsTheme(useDarkTheme = true) {
-        Box(modifier = Modifier.padding(16.dp)) {
-            ChallengeItemCard(
-                challenge = todo,
                 onClick = {},
                 onPositiveAction = {},
                 onNegativeAction = {},

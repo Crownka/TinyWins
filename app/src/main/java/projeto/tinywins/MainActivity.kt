@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,7 +25,7 @@ import projeto.tinywins.data.SettingsDataStore
 import projeto.tinywins.data.sampleChallenges
 import projeto.tinywins.ui.NavArgs
 import projeto.tinywins.ui.Screen
-import projeto.tinywins.ui.screens.ChallengeDetailsScreen
+import projeto.tinywins.ui.components.ChallengeDetailsScreen
 import projeto.tinywins.ui.screens.CreateTaskScreen
 import projeto.tinywins.ui.screens.FavoritesScreen
 import projeto.tinywins.ui.screens.HomeScreen
@@ -63,7 +64,6 @@ class MainActivity : ComponentActivity() {
             val coroutineScope = rememberCoroutineScope()
             val currentDarkTheme by settingsDataStore.themePreferenceFlow.collectAsState(initial = isSystemInDarkTheme())
             val areNotificationsEnabled by settingsDataStore.notificationsPreferenceFlow.collectAsState(initial = true)
-            // A preferência de animação ainda é lida, mas não está sendo usada para desativá-las
             val areAnimationsEnabled by settingsDataStore.animationsPreferenceFlow.collectAsState(initial = true)
 
             TinyWinsTheme(useDarkTheme = currentDarkTheme) {
@@ -78,9 +78,7 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = Screen.Home.route,
                         enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) },
-                        popEnterTransition = { fadeIn(animationSpec) },
-                        popExitTransition = { fadeOut(animationSpec) }
+                        exitTransition = { fadeOut(animationSpec) }
                     ) {
                         HomeScreen(
                             navController = navController,
@@ -95,9 +93,7 @@ class MainActivity : ComponentActivity() {
                         route = Screen.ChallengeDetails.route,
                         arguments = listOf(navArgument(NavArgs.CHALLENGE_ID) { type = NavType.StringType }),
                         enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) },
-                        popEnterTransition = { fadeIn(animationSpec) },
-                        popExitTransition = { fadeOut(animationSpec) }
+                        exitTransition = { fadeOut(animationSpec) }
                     ) { backStackEntry ->
                         val challengeId = backStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID)
                         ChallengeDetailsScreen(
@@ -109,14 +105,12 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = Screen.Favorites.route,
                         enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) },
-                        popEnterTransition = { fadeIn(animationSpec) },
-                        popExitTransition = { fadeOut(animationSpec) }
+                        exitTransition = { fadeOut(animationSpec) }
                     ) {
-                        val favorites = sampleChallenges.filter { it.isFavorite }
+                        // Passando a lista completa para a tela de favoritos
                         FavoritesScreen(
                             navController = navController,
-                            favoriteChallenges = favorites,
+                            challenges = sampleChallenges, // Passa a lista inteira
                             onChallengeClick = { challenge ->
                                 navController.navigate(Screen.ChallengeDetails.createRoute(challenge.id))
                             }
@@ -126,9 +120,7 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = Screen.Settings.route,
                         enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) },
-                        popEnterTransition = { fadeIn(animationSpec) },
-                        popExitTransition = { fadeOut(animationSpec) }
+                        exitTransition = { fadeOut(animationSpec) }
                     ) {
                         SettingsScreen(
                             navController = navController,
@@ -144,7 +136,6 @@ class MainActivity : ComponentActivity() {
                                     settingsDataStore.saveNotificationsPreference(isEnabled)
                                 }
                             },
-                            // O switch de animação será removido, então este callback não é mais necessário
                             areAnimationsEnabled = areAnimationsEnabled,
                             onAnimationsToggled = { isEnabled ->
                                 coroutineScope.launch {
@@ -157,9 +148,7 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = Screen.CreateTask.route,
                         enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) },
-                        popEnterTransition = { fadeIn(animationSpec) },
-                        popExitTransition = { fadeOut(animationSpec) }
+                        exitTransition = { fadeOut(animationSpec) }
                     ) {
                         CreateTaskScreen(navController = navController)
                     }
@@ -167,19 +156,15 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = Screen.Help.route,
                         enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) },
-                        popEnterTransition = { fadeIn(animationSpec) },
-                        popExitTransition = { fadeOut(animationSpec) }
+                        exitTransition = { fadeOut(animationSpec) }
                     ) {
-                        // Text("Tela de Ajuda (Placeholder)")
+                        // Implementar a tela de Ajuda aqui
                     }
 
                     composable(
                         route = Screen.Profile.route,
                         enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) },
-                        popEnterTransition = { fadeIn(animationSpec) },
-                        popExitTransition = { fadeOut(animationSpec) }
+                        exitTransition = { fadeOut(animationSpec) }
                     ) {
                         ProfileScreen(navController = navController)
                     }

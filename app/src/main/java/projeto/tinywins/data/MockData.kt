@@ -162,7 +162,7 @@ val sampleChallenges = mutableStateListOf(
         isFavorite = false,
         quantifiable = false
     ),
-    // Recoloquei alguns desafios que sumiram para termos mais variedade
+    // Recoloquei alguns desafios que sumiram para ter mais variedade
     TinyWinChallenge(
         id = UUID.randomUUID().toString(),
         title = "Fazer uma pausa sem telas",

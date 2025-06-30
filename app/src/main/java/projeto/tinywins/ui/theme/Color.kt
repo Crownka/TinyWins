@@ -70,6 +70,3 @@ val md_theme_dark_onSurface = Color(0xFFE2E3DC)
 val md_theme_dark_surfaceVariant = Color(0xFF43483F)
 val md_theme_dark_onSurfaceVariant = Color(0xFFC3C8BC)
 val md_theme_dark_outline = Color(0xFF8D9387)
-
-// Outras cores que podem ser úteis (seed para cores dinâmicas, se usadas)
-// val seed = Color(0xFF4CAF50) // Exemplo, nosso verde antigo

@@ -12,7 +12,6 @@ class AlarmScheduler(private val context: Context) {
 
     fun schedule(challenge: TinyWinChallenge, timeInMillis: Long) {
         val intent = Intent(context, NotificationReceiver::class.java).apply {
-            // CORREÇÃO: Usando as constantes a partir da sua classe de origem
             putExtra(NotificationReceiver.EXTRA_TITLE, challenge.title)
             putExtra(NotificationReceiver.EXTRA_MESSAGE, "Este é o seu lembrete para completar a tarefa!")
             putExtra(NotificationReceiver.NOTIFICATION_ID, challenge.id.hashCode())
@@ -28,6 +27,7 @@ class AlarmScheduler(private val context: Context) {
         val canScheduleExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             alarmManager.canScheduleExactAlarms()
         } else {
+            // Para versões mais antigas
             true
         }
 

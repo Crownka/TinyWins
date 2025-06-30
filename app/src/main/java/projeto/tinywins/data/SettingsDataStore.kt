@@ -12,15 +12,14 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-// A instância do DataStore permanece a mesma
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "tiny_wins_settings")
 
-/**
- * Esta classe agora gerencia todas as configurações do meu app.
- */
+
+// Essa classe agora gerencia todas as configurações do meu app.
+
 class SettingsDataStore(private val context: Context) {
 
-    // --- Preferência de Tema Escuro (Já existente) ---
+    // --- Preferência de Tema Escuro ---
     private val IS_DARK_MODE_KEY = booleanPreferencesKey("is_dark_mode_enabled")
 
     val themePreferenceFlow: Flow<Boolean> = context.dataStore.data
@@ -41,7 +40,7 @@ class SettingsDataStore(private val context: Context) {
         }
     }
 
-    // --- Preferência de Notificações (Já existente) ---
+    // --- Preferência de Notificações ---
     private val ARE_NOTIFICATIONS_ENABLED_KEY = booleanPreferencesKey("are_notifications_enabled")
 
     val notificationsPreferenceFlow: Flow<Boolean> = context.dataStore.data

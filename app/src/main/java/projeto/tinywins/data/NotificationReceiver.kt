@@ -11,7 +11,8 @@ import projeto.tinywins.R
 
 class NotificationReceiver : BroadcastReceiver() {
 
-    // As constantes para a notificação são definidas aqui
+    // As constantes para a notificação são definidas aqui, dentro de um companion object,
+    // para que possam ser acessadas de outros arquivos (como o AlarmScheduler).
     companion object {
         const val EXTRA_TITLE = "EXTRA_TITLE"
         const val EXTRA_MESSAGE = "EXTRA_MESSAGE"
