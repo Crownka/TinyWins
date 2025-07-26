@@ -1,1 +1,46 @@
-/build
+# Arquivos gerados pelo Gradle
+# ===================================
+.gradle
+build/
+captures/
+.cxx/
+
+# Arquivos gerados pelo IntelliJ / Android Studio
+# ===============================================
+*.iml
+.idea/
+.idea/caches/
+.idea/libraries/
+.idea/misc.xml
+.idea/modules.xml
+.idea/runConfigurations/
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Arquivos de configuração local - MUITO IMPORTANTE PARA SEGURANÇA
+# ===================================================================
+local.properties
+
+# Chaves de API e arquivos de serviço - MUITO IMPORTANTE PARA SEGURANÇA
+# =======================================================================
+# Ignora o arquivo de configuração do Firebase para não expor chaves em repositórios públicos.
+# Em um time, este arquivo geralmente é compartilhado de forma segura (ex: por um chat privado).
+google-services.json
+
+# Ignora chaves de assinatura de release do aplicativo.
+*.jks
+*.keystore
+
+# Arquivos de sistema operacional
+# ===============================
+# Mac
+.DS_Store
+# Windows
+Thumbs.db
+
+# Pacotes de aplicativos gerados (APKs e AABs)
+# =============================================
+*.apk
+*.aab
+output.json

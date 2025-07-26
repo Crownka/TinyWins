@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,6 +42,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,22 +52,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import projeto.tinywins.data.AlarmScheduler
 import projeto.tinywins.data.ChallengeCategory
 import projeto.tinywins.data.ChecklistItem
 import projeto.tinywins.data.Difficulty
 import projeto.tinywins.data.ResetFrequency
 import projeto.tinywins.data.TaskType
 import projeto.tinywins.data.TinyWinChallenge
-import projeto.tinywins.data.sampleChallenges
-import projeto.tinywins.ui.theme.TinyWinsTheme
+import projeto.tinywins.ui.viewmodel.CreateTaskUiState
+import projeto.tinywins.ui.viewmodel.CreateTaskViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -112,7 +111,10 @@ fun TimePickerDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateTaskScreen(navController: NavHostController) {
+fun CreateTaskScreen(
+    navController: NavHostController,
+    viewModel: CreateTaskViewModel // Recebe o ViewModel
+) {
     var title by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     var selectedTaskType by remember { mutableStateOf(TaskType.HABIT) }
@@ -125,8 +127,15 @@ fun CreateTaskScreen(navController: NavHostController) {
     val checklistItems = remember { mutableStateListOf<ChecklistItem>() }
     val reminders = remember { mutableStateListOf<Long>() }
     var showTimePicker by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val alarmScheduler = remember { AlarmScheduler(context) }
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Efeito para navegar de volta quando o estado for Sucesso
+    LaunchedEffect(uiState) {
+        if (uiState is CreateTaskUiState.Success) {
+            navController.popBackStack()
+        }
+    }
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState()
@@ -179,19 +188,14 @@ fun CreateTaskScreen(navController: NavHostController) {
                     }
                 },
                 actions = {
+                    val isLoading = uiState is CreateTaskUiState.Loading
                     TextButton(
                         onClick = {
                             val xpReward = when(selectedDifficulty) {
-                                Difficulty.TRIVIAL -> 5
-                                Difficulty.EASY -> 15
-                                Difficulty.MEDIUM -> 25
-                                Difficulty.HARD -> 40
+                                Difficulty.TRIVIAL -> 5; Difficulty.EASY -> 15; Difficulty.MEDIUM -> 25; Difficulty.HARD -> 40
                             }
                             val coinReward = when(selectedDifficulty) {
-                                Difficulty.TRIVIAL -> 5
-                                Difficulty.EASY -> 10
-                                Difficulty.MEDIUM -> 20
-                                Difficulty.HARD -> 30
+                                Difficulty.TRIVIAL -> 5; Difficulty.EASY -> 10; Difficulty.MEDIUM -> 20; Difficulty.HARD -> 30
                             }
                             val newChallenge = TinyWinChallenge(
                                 id = UUID.randomUUID().toString(),
@@ -207,20 +211,18 @@ fun CreateTaskScreen(navController: NavHostController) {
                                 dueDate = if (selectedTaskType == TaskType.TODO) selectedDateMillis else null,
                                 checklist = if (selectedTaskType == TaskType.TODO) checklistItems.toList() else emptyList(),
                                 reminders = reminders.toList(),
-                                category = ChallengeCategory.PRODUTIVIDADE,
-                                imageResId = null
+                                category = ChallengeCategory.PRODUTIVIDADE
                             )
-
-                            if (newChallenge.type == TaskType.TODO && newChallenge.reminders.isNotEmpty()) {
-                                newChallenge.reminders.forEach { reminderTime ->
-                                    alarmScheduler.schedule(newChallenge, reminderTime)
-                                }
-                            }
-                            sampleChallenges.add(0, newChallenge)
-                            navController.popBackStack()
+                            viewModel.createChallenge(newChallenge)
                         },
-                        enabled = title.isNotBlank()
-                    ) { Text("CRIAR", fontWeight = FontWeight.Bold) }
+                        enabled = title.isNotBlank() && !isLoading
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        } else {
+                            Text("CRIAR", fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
             )
         }
@@ -301,6 +303,7 @@ fun CreateTaskScreen(navController: NavHostController) {
     }
 }
 
+// As funções auxiliares (HabitOptions, TodoOptions, etc.) continuam as mesmas
 @Composable
 private fun HabitOptions(
     isPositive: Boolean,
@@ -451,14 +454,5 @@ private fun DifficultyButton(
                 color = contentColor
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CreateTaskScreenPreview() {
-    TinyWinsTheme(useDarkTheme = true) {
-        val navController = rememberNavController()
-        CreateTaskScreen(navController = navController)
     }
 }

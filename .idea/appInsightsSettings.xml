@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="projeto.tinywins" />
+                  <option name="mobileSdkAppId" value="1:159743245807:android:bc5ee55689952a158b8a1a" />
+                  <option name="projectId" value="tiny-wins-2b27d" />
+                  <option name="projectNumber" value="159743245807" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

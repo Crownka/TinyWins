@@ -5,6 +5,10 @@ object NavArgs {
 }
 
 sealed class Screen(val route: String) {
+    data object AuthCheck : Screen("auth_check_screen") // Nova tela inicial
+    data object Login : Screen("login_screen") // Nova tela
+    data object Registration : Screen("registration_screen") // Nova tela
+
     data object Home : Screen("home_screen")
     data object ChallengeDetails : Screen("challenge_details_screen/{${NavArgs.CHALLENGE_ID}}") {
         fun createRoute(challengeId: String) = "challenge_details_screen/$challengeId"
