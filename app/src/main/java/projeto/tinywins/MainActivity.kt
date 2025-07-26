@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import projeto.tinywins.data.FirebaseRepository
 import projeto.tinywins.data.NetworkStatusTracker
 import projeto.tinywins.data.SettingsDataStore
+import projeto.tinywins.data.auth.AuthRepository
 import projeto.tinywins.data.sampleChallenges
 import projeto.tinywins.ui.NavArgs
 import projeto.tinywins.ui.Screen
@@ -44,6 +45,7 @@ import projeto.tinywins.ui.screens.SettingsScreen
 import projeto.tinywins.ui.theme.TinyWinsTheme
 import projeto.tinywins.ui.viewmodel.CreateTaskViewModel
 import projeto.tinywins.ui.viewmodel.HomeViewModel
+import projeto.tinywins.ui.viewmodel.LoginViewModel
 import projeto.tinywins.ui.viewmodel.ViewModelFactory
 
 class MainActivity : ComponentActivity() {
@@ -76,30 +78,24 @@ class MainActivity : ComponentActivity() {
 
             val coroutineScope = rememberCoroutineScope()
             val currentDarkTheme by settingsDataStore.themePreferenceFlow.collectAsState(initial = isSystemInDarkTheme())
-            val areNotificationsEnabled by settingsDataStore.notificationsPreferenceFlow.collectAsState(initial = true)
-            val areAnimationsEnabled by settingsDataStore.animationsPreferenceFlow.collectAsState(initial = true)
 
             val networkStatusTracker = remember { NetworkStatusTracker(applicationContext) }
-            val repository = remember { FirebaseRepository(networkStatusTracker) }
-            val viewModelFactory = remember { ViewModelFactory(repository) }
+            val firebaseRepository = remember { FirebaseRepository(networkStatusTracker) }
+            val authRepository = remember { AuthRepository() } // Instancia o novo repositório
+            val viewModelFactory = remember { ViewModelFactory(firebaseRepository, authRepository) }
 
             TinyWinsTheme(useDarkTheme = currentDarkTheme) {
                 val navController = rememberNavController()
 
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.AuthCheck.route // NOVO PONTO DE PARTIDA
+                    startDestination = Screen.AuthCheck.route
                 ) {
-                    val animationSpec = tween<Float>(durationMillis = 700)
-
                     composable(Screen.AuthCheck.route) {
-                        // TODO: Lógica para verificar se o usuário está logado
-                        // Por enquanto, só uma tela de loading que nos levará para o login
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator()
                         }
                         LaunchedEffect(Unit) {
-                            // Simulando a verificação e navegando para o login
                             navController.navigate(Screen.Login.route) {
                                 popUpTo(Screen.AuthCheck.route) { inclusive = true }
                             }
@@ -107,7 +103,11 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(Screen.Login.route) {
-                        LoginScreen(navController = navController)
+                        val loginViewModel: LoginViewModel = viewModel(factory = viewModelFactory)
+                        LoginScreen(
+                            navController = navController,
+                            viewModel = loginViewModel // Passa o ViewModel para a tela
+                        )
                     }
 
                     composable(Screen.Registration.route) {
@@ -115,9 +115,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(
-                        route = Screen.Home.route,
-                        enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) }
+                        route = Screen.Home.route
                     ) {
                         val homeViewModel: HomeViewModel = viewModel(factory = viewModelFactory)
                         HomeScreen(
@@ -131,9 +129,7 @@ class MainActivity : ComponentActivity() {
 
                     composable(
                         route = Screen.ChallengeDetails.route,
-                        arguments = listOf(navArgument(NavArgs.CHALLENGE_ID) { type = NavType.StringType }),
-                        enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) }
+                        arguments = listOf(navArgument(NavArgs.CHALLENGE_ID) { type = NavType.StringType })
                     ) { backStackEntry ->
                         val challengeId = backStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID)
                         ChallengeDetailsScreen(
@@ -142,10 +138,17 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    composable(Screen.CreateTask.route) {
+                        val createTaskViewModel: CreateTaskViewModel = viewModel(factory = viewModelFactory)
+                        CreateTaskScreen(
+                            navController = navController,
+                            viewModel = createTaskViewModel
+                        )
+                    }
+
+                    // Manter as rotas para as outras telas que ainda não foram integradas
                     composable(
-                        route = Screen.Favorites.route,
-                        enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) }
+                        route = Screen.Favorites.route
                     ) {
                         FavoritesScreen(
                             navController = navController,
@@ -155,12 +158,11 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                     composable(
-                        route = Screen.Settings.route,
-                        enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) }
+                        route = Screen.Settings.route
                     ) {
+                        val areNotificationsEnabled by settingsDataStore.notificationsPreferenceFlow.collectAsState(initial = true)
+                        val areAnimationsEnabled by settingsDataStore.animationsPreferenceFlow.collectAsState(initial = true)
                         SettingsScreen(
                             navController = navController,
                             currentThemeIsDark = currentDarkTheme,
@@ -183,33 +185,13 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                     composable(
-                        route = Screen.CreateTask.route,
-                        enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) }
-                    ) {
-                        val createTaskViewModel: CreateTaskViewModel = viewModel(factory = viewModelFactory)
-                        CreateTaskScreen(
-                            navController = navController,
-                            viewModel = createTaskViewModel
-                        )
-                    }
-
-                    composable(
-                        route = Screen.Help.route,
-                        enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) }
+                        route = Screen.Help.route
                     ) {
                         // Implementar a tela de Ajuda aqui
                     }
-
-
-
                     composable(
-                        route = Screen.Profile.route,
-                        enterTransition = { fadeIn(animationSpec) },
-                        exitTransition = { fadeOut(animationSpec) }
+                        route = Screen.Profile.route
                     ) {
                         ProfileScreen(navController = navController)
                     }
