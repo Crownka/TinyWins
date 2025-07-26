@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import projeto.tinywins.data.FirebaseRepository
 import projeto.tinywins.data.auth.AuthRepository
 
-// A factory agora precisa dos dois repositórios
 class ViewModelFactory(
     private val firebaseRepository: FirebaseRepository,
     private val authRepository: AuthRepository
@@ -19,10 +18,14 @@ class ViewModelFactory(
             @Suppress("UNCHECKED_CAST")
             return CreateTaskViewModel(firebaseRepository) as T
         }
-        // Lógica para criar o nosso novo LoginViewModel
         if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return LoginViewModel(authRepository) as T
+        }
+        // Lógica para criar nosso novo RegistrationViewModel
+        if (modelClass.isAssignableFrom(RegistrationViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return RegistrationViewModel(authRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

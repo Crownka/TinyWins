@@ -46,6 +46,7 @@ import projeto.tinywins.ui.theme.TinyWinsTheme
 import projeto.tinywins.ui.viewmodel.CreateTaskViewModel
 import projeto.tinywins.ui.viewmodel.HomeViewModel
 import projeto.tinywins.ui.viewmodel.LoginViewModel
+import projeto.tinywins.ui.viewmodel.RegistrationViewModel
 import projeto.tinywins.ui.viewmodel.ViewModelFactory
 
 class MainActivity : ComponentActivity() {
@@ -81,7 +82,7 @@ class MainActivity : ComponentActivity() {
 
             val networkStatusTracker = remember { NetworkStatusTracker(applicationContext) }
             val firebaseRepository = remember { FirebaseRepository(networkStatusTracker) }
-            val authRepository = remember { AuthRepository() } // Instancia o novo repositório
+            val authRepository = remember { AuthRepository() }
             val viewModelFactory = remember { ViewModelFactory(firebaseRepository, authRepository) }
 
             TinyWinsTheme(useDarkTheme = currentDarkTheme) {
@@ -106,12 +107,16 @@ class MainActivity : ComponentActivity() {
                         val loginViewModel: LoginViewModel = viewModel(factory = viewModelFactory)
                         LoginScreen(
                             navController = navController,
-                            viewModel = loginViewModel // Passa o ViewModel para a tela
+                            viewModel = loginViewModel
                         )
                     }
 
                     composable(Screen.Registration.route) {
-                        RegistrationScreen(navController = navController)
+                        val registrationViewModel: RegistrationViewModel = viewModel(factory = viewModelFactory)
+                        RegistrationScreen(
+                            navController = navController,
+                            viewModel = registrationViewModel
+                        )
                     }
 
                     composable(
