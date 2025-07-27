@@ -39,11 +39,14 @@ import projeto.tinywins.ui.auth.RegistrationScreen
 import projeto.tinywins.ui.components.ChallengeDetailsScreen
 import projeto.tinywins.ui.screens.CreateTaskScreen
 import projeto.tinywins.ui.screens.FavoritesScreen
+import projeto.tinywins.ui.screens.HelpScreen
 import projeto.tinywins.ui.screens.HomeScreen
 import projeto.tinywins.ui.screens.ProfileScreen
 import projeto.tinywins.ui.screens.SettingsScreen
 import projeto.tinywins.ui.theme.TinyWinsTheme
+import projeto.tinywins.ui.viewmodel.ChallengeDetailsViewModel
 import projeto.tinywins.ui.viewmodel.CreateTaskViewModel
+import projeto.tinywins.ui.viewmodel.FavoritesViewModel
 import projeto.tinywins.ui.viewmodel.HomeViewModel
 import projeto.tinywins.ui.viewmodel.LoginViewModel
 import projeto.tinywins.ui.viewmodel.RegistrationViewModel
@@ -97,8 +100,14 @@ class MainActivity : ComponentActivity() {
                             CircularProgressIndicator()
                         }
                         LaunchedEffect(Unit) {
-                            navController.navigate(Screen.Login.route) {
-                                popUpTo(Screen.AuthCheck.route) { inclusive = true }
+                            if (authRepository.currentUser != null) {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.AuthCheck.route) { inclusive = true }
+                                }
+                            } else {
+                                navController.navigate(Screen.Login.route) {
+                                    popUpTo(Screen.AuthCheck.route) { inclusive = true }
+                                }
                             }
                         }
                     }
@@ -119,9 +128,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable(
-                        route = Screen.Home.route
-                    ) {
+                    composable(route = Screen.Home.route) {
                         val homeViewModel: HomeViewModel = viewModel(factory = viewModelFactory)
                         HomeScreen(
                             navController = navController,
@@ -137,9 +144,13 @@ class MainActivity : ComponentActivity() {
                         arguments = listOf(navArgument(NavArgs.CHALLENGE_ID) { type = NavType.StringType })
                     ) { backStackEntry ->
                         val challengeId = backStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID)
+                        val detailsViewModel = ChallengeDetailsViewModel(
+                            challengeId = challengeId ?: "",
+                            repository = firebaseRepository
+                        )
                         ChallengeDetailsScreen(
                             navController = navController,
-                            challengeId = challengeId
+                            viewModel = detailsViewModel
                         )
                     }
 
@@ -151,21 +162,18 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // Manter as rotas para as outras telas que ainda não foram integradas
-                    composable(
-                        route = Screen.Favorites.route
-                    ) {
+                    composable(route = Screen.Favorites.route) {
+                        val favoritesViewModel: FavoritesViewModel = viewModel(factory = viewModelFactory)
                         FavoritesScreen(
                             navController = navController,
-                            challenges = sampleChallenges,
+                            viewModel = favoritesViewModel,
                             onChallengeClick = { challenge ->
                                 navController.navigate(Screen.ChallengeDetails.createRoute(challenge.id))
                             }
                         )
                     }
-                    composable(
-                        route = Screen.Settings.route
-                    ) {
+
+                    composable(route = Screen.Settings.route) {
                         val areNotificationsEnabled by settingsDataStore.notificationsPreferenceFlow.collectAsState(initial = true)
                         val areAnimationsEnabled by settingsDataStore.animationsPreferenceFlow.collectAsState(initial = true)
                         SettingsScreen(
@@ -190,14 +198,13 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-                    composable(
-                        route = Screen.Help.route
-                    ) {
-                        // Implementar a tela de Ajuda aqui
+
+                    // A rota de Ajuda agora tem um destino
+                    composable(route = Screen.Help.route) {
+                        HelpScreen(navController = navController)
                     }
-                    composable(
-                        route = Screen.Profile.route
-                    ) {
+
+                    composable(route = Screen.Profile.route) {
                         ProfileScreen(navController = navController)
                     }
                 }

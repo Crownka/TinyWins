@@ -77,7 +77,7 @@ fun HomeScreen(
     var selectedTab by remember { mutableStateOf(TaskType.HABIT) }
 
     val uiState by viewModel.uiState.collectAsState()
-    val isOnline by viewModel.isOnline.collectAsState() // Coleta o estado da conexão
+    val isOnline by viewModel.isOnline.collectAsState()
 
     Scaffold(
         topBar = {
@@ -89,7 +89,6 @@ fun HomeScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
                 actions = {
-                    // Ícone de status de conexão dinâmico
                     val syncIcon = if (isOnline) Icons.Default.CloudDone else Icons.Default.CloudOff
                     val syncColor = if (isOnline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     Icon(
@@ -105,6 +104,20 @@ fun HomeScreen(
                             DropdownMenuItem(text = { Text("Favoritos") }, onClick = { navController.navigate(Screen.Favorites.route); menuExpanded = false })
                             DropdownMenuItem(text = { Text("Configurações") }, onClick = { navController.navigate(Screen.Settings.route); menuExpanded = false })
                             DropdownMenuItem(text = { Text("Ajuda") }, onClick = { navController.navigate(Screen.Help.route); menuExpanded = false })
+                            // NOVO BOTÃO DE LOGOUT
+                            DropdownMenuItem(
+                                text = { Text("Sair") },
+                                onClick = {
+                                    viewModel.signOut()
+                                    // Navega para a tela de login e limpa toda a pilha de navegação
+                                    navController.navigate(Screen.Login.route) {
+                                        popUpTo(navController.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+                                    menuExpanded = false
+                                }
+                            )
                         }
                     }
                 }

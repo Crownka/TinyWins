@@ -9,10 +9,9 @@ import kotlinx.coroutines.launch
 import projeto.tinywins.data.auth.AuthRepository
 import projeto.tinywins.data.auth.Resource
 
-// Estados da UI para a tela de Login
 sealed interface LoginUiState {
-    object Idle : LoginUiState // Estado inicial
-    object Loading : LoginUiState // Processando o login
+    object Idle : LoginUiState
+    object Loading : LoginUiState
     data class Success(val authResult: AuthResult) : LoginUiState
     data class Error(val message: String) : LoginUiState
 }
@@ -23,7 +22,6 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
     val uiState = _uiState.asStateFlow()
 
     fun loginUser(email: String, password: String) {
-        // Validação simples para evitar chamadas vazias
         if (email.isBlank() || password.isBlank()) {
             _uiState.value = LoginUiState.Error("Email e senha não podem estar em branco.")
             return
@@ -39,7 +37,23 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    // Função para resetar o estado, útil para limpar a mensagem de erro
+    // NOVA FUNÇÃO para login com Google
+    fun signInWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _uiState.value = LoginUiState.Loading
+            val result = repository.signInWithGoogle(idToken)
+            _uiState.value = when (result) {
+                is Resource.Success -> LoginUiState.Success(result.data)
+                is Resource.Error -> LoginUiState.Error(result.message)
+            }
+        }
+    }
+
+    // Seta o estado para Loading, usado pelo botão do Google para mostrar o spinner
+    fun setLoading() {
+        _uiState.value = LoginUiState.Loading
+    }
+
     fun resetState() {
         _uiState.value = LoginUiState.Idle
     }

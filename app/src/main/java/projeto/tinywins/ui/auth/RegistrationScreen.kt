@@ -41,7 +41,7 @@ import projeto.tinywins.ui.viewmodel.RegistrationViewModel
 @Composable
 fun RegistrationScreen(
     navController: NavHostController,
-    viewModel: RegistrationViewModel // Recebe o ViewModel
+    viewModel: RegistrationViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -52,7 +52,6 @@ fun RegistrationScreen(
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is RegistrationUiState.Success -> {
-                // Navega para a Home e limpa a pilha de navegação
                 navController.navigate(Screen.Home.route) {
                     popUpTo(Screen.Login.route) { inclusive = true }
                 }
@@ -119,7 +118,8 @@ fun RegistrationScreen(
             Button(
                 onClick = {
                     if (password == confirmPassword) {
-                        viewModel.registerUser(email, password)
+                        // A CORREÇÃO ESTÁ AQUI: usamos .trim() para limpar os espaços
+                        viewModel.registerUser(email.trim(), password)
                     } else {
                         Toast.makeText(context, "As senhas não coincidem.", Toast.LENGTH_SHORT).show()
                     }

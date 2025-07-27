@@ -2,6 +2,7 @@ package projeto.tinywins.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import projeto.tinywins.data.FirebaseRepository
 import projeto.tinywins.data.TinyWinChallenge
+import projeto.tinywins.data.auth.AuthRepository
 import projeto.tinywins.data.sampleChallenges
 
 sealed interface HomeUiState {
@@ -19,20 +21,23 @@ sealed interface HomeUiState {
     object Loading : HomeUiState
 }
 
-class HomeViewModel(private val repository: FirebaseRepository) : ViewModel() {
+// O ViewModel agora recebe os dois repositórios
+class HomeViewModel(
+    private val firebaseRepository: FirebaseRepository,
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     val isOnline: StateFlow<Boolean>
     val uiState: StateFlow<HomeUiState>
 
     init {
-        isOnline = repository.isOnline.stateIn(
+        isOnline = firebaseRepository.isOnline.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = true
         )
 
-        uiState = repository.getChallenges()
-            // A CORREÇÃO ESTÁ AQUI: Especificamos o tipo de retorno geral <HomeUiState>
+        uiState = firebaseRepository.getChallenges()
             .map<List<TinyWinChallenge>, HomeUiState> { challenges ->
                 HomeUiState.Success(challenges)
             }
@@ -45,21 +50,25 @@ class HomeViewModel(private val repository: FirebaseRepository) : ViewModel() {
                 initialValue = HomeUiState.Loading
             )
 
-        // Lógica para o seed automático (continua a mesma)
         viewModelScope.launch {
-            // Usamos um pequeno delay para garantir que o uiState inicial já foi coletado
-            kotlinx.coroutines.delay(1000)
-            if (isOnline.first() && (uiState.value as? HomeUiState.Success)?.challenges?.isEmpty() == true) {
-                seedDatabase()
+            kotlinx.coroutines.delay(1500)
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            if (currentUser != null && isOnline.first() && (uiState.value as? HomeUiState.Success)?.challenges?.isEmpty() == true) {
+                seedDatabaseForCurrentUser()
             }
         }
     }
 
-    private fun seedDatabase() {
+    private fun seedDatabaseForCurrentUser() {
         viewModelScope.launch {
             sampleChallenges.forEach { challenge ->
-                repository.updateChallenge(challenge.id, challenge)
+                firebaseRepository.updateChallenge(challenge.id, challenge)
             }
         }
+    }
+
+    // Nova função para fazer logout
+    fun signOut() {
+        authRepository.signOut()
     }
 }

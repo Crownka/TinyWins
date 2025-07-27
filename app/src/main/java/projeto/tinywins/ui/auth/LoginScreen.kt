@@ -29,33 +29,32 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import projeto.tinywins.ui.Screen
+import projeto.tinywins.ui.auth.components.GoogleSignInButton
 import projeto.tinywins.ui.viewmodel.LoginUiState
 import projeto.tinywins.ui.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    viewModel: LoginViewModel // Recebe o ViewModel
+    viewModel: LoginViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // Observa o estado da UI para navegar ou mostrar erros
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is LoginUiState.Success -> {
-                // Navega para a Home e limpa a pilha de navegação
                 navController.navigate(Screen.Home.route) {
                     popUpTo(Screen.Login.route) { inclusive = true }
                 }
             }
             is LoginUiState.Error -> {
                 Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
-                viewModel.resetState() // Limpa o erro para não mostrar novamente
+                viewModel.resetState()
             }
-            else -> Unit // Não faz nada em Idle ou Loading
+            else -> Unit
         }
     }
 
@@ -93,7 +92,10 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { viewModel.loginUser(email, password) },
+                onClick = {
+                    // A CORREÇÃO ESTÁ AQUI: usamos .trim() para limpar os espaços
+                    viewModel.loginUser(email.trim(), password)
+                },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading
             ) {
@@ -105,13 +107,15 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = { /* TODO: Lógica de Login com Google */ },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
-            ) {
-                Text("ENTRAR COM O GOOGLE")
-            }
+            GoogleSignInButton(
+                state = uiState,
+                onTokenReceived = { token ->
+                    viewModel.signInWithGoogle(token)
+                },
+                onClick = {
+                    viewModel.setLoading()
+                }
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(
