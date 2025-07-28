@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 import java.util.UUID
@@ -21,11 +22,12 @@ enum class TaskType { HABIT, TODO }
 enum class Difficulty { TRIVIAL, EASY, MEDIUM, HARD }
 enum class ResetFrequency { DAILY, WEEKLY, MONTHLY }
 
-// ChecklistItem também precisa de valores padrão para ser aninhado
 data class ChecklistItem(
     val id: String = UUID.randomUUID().toString(),
     var text: String = "",
-    var isCompleted: Boolean = false
+    // Para o Firestore, booleanos simples funcionam melhor sem o prefixo "is" na declaração da classe.
+    // Mas vamos manter a consistência e usar PropertyName para garantir.
+    @get:PropertyName("isCompleted") val isCompleted: Boolean = false
 )
 
 enum class ChallengeCategory {
@@ -33,9 +35,8 @@ enum class ChallengeCategory {
     AUTOCONHECIMENTO, SOCIAL, FINANCAS, ORGANIZACAO
 }
 
-// Data class pronta para o Firestore, com valores padrão em todos os campos.
 data class TinyWinChallenge(
-    @DocumentId val id: String = "", // Mapeia o ID do documento do Firestore para este campo
+    @DocumentId val id: String = "",
     val title: String = "",
     val description: String = "",
     val type: TaskType = TaskType.HABIT,
@@ -43,23 +44,28 @@ data class TinyWinChallenge(
     val coins: Int = 0,
     val diamonds: Int = 0,
     val difficulty: Difficulty = Difficulty.EASY,
-    val isPositive: Boolean = true,
-    val isNegative: Boolean = false,
+
+    // A anotação @get:PropertyName força o Firebase a usar EXATAMENTE este nome
+    // tanto para ler quanto para escrever, resolvendo o bug.
+    @get:PropertyName("isPositive") val isPositive: Boolean = true,
+    @get:PropertyName("isNegative") val isNegative: Boolean = false,
+
     val resetFrequency: ResetFrequency? = null,
     val dueDate: Long? = null,
     val reminders: List<Long> = emptyList(),
     val checklist: List<ChecklistItem> = emptyList(),
     val category: ChallengeCategory = ChallengeCategory.PRODUTIVIDADE,
-    var isCompleted: Boolean = false,
-    var isFavorite: Boolean = false,
+
+    @get:PropertyName("isCompleted") val isCompleted: Boolean = false,
+    @get:PropertyName("isFavorite") val isFavorite: Boolean = false,
+
     val quantifiable: Boolean = false,
     var currentProgress: Int = 0,
     val targetProgress: Int = 1,
     val pointsPerUnit: Int = 0,
-    @ServerTimestamp val createdAt: Date? = null // Adiciona um timestamp de quando foi criado no servidor
+    @ServerTimestamp val createdAt: Date? = null
 )
 
-// As funções de UI abaixo não mudam
 @Composable
 fun ChallengeCategory.toColor(): Color {
     return when (this) {

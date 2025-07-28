@@ -24,12 +24,20 @@ class ViewModelFactory(
         }
         if (modelClass.isAssignableFrom(RegistrationViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return RegistrationViewModel(authRepository) as T
+            // Agora passamos os dois repositórios
+            return RegistrationViewModel(authRepository, firebaseRepository) as T
         }
-        // Lógica para criar nosso novo FavoritesViewModel
         if (modelClass.isAssignableFrom(FavoritesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return FavoritesViewModel(firebaseRepository) as T
+        }
+        if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ProfileViewModel(firebaseRepository) as T
+        }
+        if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return SettingsViewModel(firebaseRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

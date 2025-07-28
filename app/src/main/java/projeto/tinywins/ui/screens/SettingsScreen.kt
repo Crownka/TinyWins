@@ -31,17 +31,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import projeto.tinywins.data.sampleChallenges
-import projeto.tinywins.ui.theme.TinyWinsTheme
+import projeto.tinywins.ui.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavHostController,
+    viewModel: SettingsViewModel,
     currentThemeIsDark: Boolean,
     onThemeToggled: (Boolean) -> Unit,
     areNotificationsEnabled: Boolean,
@@ -49,10 +47,8 @@ fun SettingsScreen(
     areAnimationsEnabled: Boolean,
     onAnimationsToggled: (Boolean) -> Unit
 ) {
-    // Estado para controlar a visibilidade do diálogo de confirmação
     var showClearFavoritesDialog by remember { mutableStateOf(false) }
 
-    // Diálogo de confirmação para limpar os favoritos
     if (showClearFavoritesDialog) {
         AlertDialog(
             onDismissRequest = { showClearFavoritesDialog = false },
@@ -61,12 +57,7 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // Lógica para limpar os favoritos
-                        sampleChallenges.forEach { challenge ->
-                            if (challenge.isFavorite) {
-                                challenge.isFavorite = false
-                            }
-                        }
+                        viewModel.clearAllFavorites()
                         showClearFavoritesDialog = false
                     }
                 ) {
@@ -115,8 +106,6 @@ fun SettingsScreen(
                 isChecked = areNotificationsEnabled,
                 onCheckedChange = onNotificationsToggled
             )
-            // O switch de animações foi removido da UI, mas a lógica permanece no MainActivity
-            // para manter as animações sempre ativas (por enquanto)
 
             Spacer(modifier = Modifier.height(24.dp))
             Divider()
@@ -124,9 +113,8 @@ fun SettingsScreen(
 
             Text("Gerenciamento de Dados", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
 
-            // BOTÃO "LIMPAR FAVORITOS"
             Button(
-                onClick = { showClearFavoritesDialog = true }, // Abre o diálogo
+                onClick = { showClearFavoritesDialog = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -154,22 +142,5 @@ private fun SettingSwitchItem(
     ) {
         Text(text = title, style = MaterialTheme.typography.bodyLarge)
         Switch(checked = isChecked, onCheckedChange = onCheckedChange)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreviewLight() {
-    TinyWinsTheme(useDarkTheme = false) {
-        val navController = rememberNavController()
-        SettingsScreen(
-            navController = navController,
-            currentThemeIsDark = false,
-            onThemeToggled = {},
-            areNotificationsEnabled = true,
-            onNotificationsToggled = {},
-            areAnimationsEnabled = true,
-            onAnimationsToggled = {}
-        )
     }
 }

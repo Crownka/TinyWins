@@ -23,8 +23,7 @@ class CreateTaskViewModel(private val repository: FirebaseRepository) : ViewMode
         viewModelScope.launch {
             _uiState.value = CreateTaskUiState.Loading
             try {
-                // A lógica aqui não muda, pois o repositório já sabe qual é o usuário
-                repository.updateChallenge(challenge.id, challenge)
+                repository.addChallenge(challenge)
                 _uiState.value = CreateTaskUiState.Success
             } catch (e: Exception) {
                 println("Erro ao criar desafio: ${e.message}")

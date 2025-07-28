@@ -6,6 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+// Voltamos a usar a FontFamily.Default para todos os estilos de texto.
 val AppTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -28,7 +29,6 @@ val AppTypography = Typography(
         lineHeight = 44.sp,
         letterSpacing = 0.sp
     ),
-    // Headline
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -50,10 +50,9 @@ val AppTypography = Typography(
         lineHeight = 32.sp,
         letterSpacing = 0.sp
     ),
-    // Title
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal, // Ou FontWeight.Medium
+        fontWeight = FontWeight.Normal,
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
@@ -72,7 +71,6 @@ val AppTypography = Typography(
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp
     ),
-    // Body
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -94,7 +92,6 @@ val AppTypography = Typography(
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp
     ),
-    // Label
     labelLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Medium,

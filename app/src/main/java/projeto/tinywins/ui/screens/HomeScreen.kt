@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -48,6 +49,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.delay
+import java.util.Locale
 import projeto.tinywins.data.TaskType
 import projeto.tinywins.data.TinyWinChallenge
 import projeto.tinywins.ui.Screen
@@ -55,7 +58,6 @@ import projeto.tinywins.ui.components.ChallengeItemCard
 import projeto.tinywins.ui.components.PlayerStatusHeader
 import projeto.tinywins.ui.viewmodel.HomeUiState
 import projeto.tinywins.ui.viewmodel.HomeViewModel
-import java.util.Locale
 
 val DiamondShape = GenericShape { size, _ ->
     moveTo(size.width / 2f, 0f)
@@ -78,6 +80,16 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val isOnline by viewModel.isOnline.collectAsState()
+    val playerStats by viewModel.playerStats.collectAsState()
+
+    var lastInteractedChallengeId by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(lastInteractedChallengeId) {
+        if (lastInteractedChallengeId != null) {
+            delay(200)
+            lastInteractedChallengeId = null
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -97,19 +109,16 @@ fun HomeScreen(
                         tint = syncColor,
                         modifier = Modifier.padding(end = 8.dp)
                     )
-
                     Box {
                         IconButton(onClick = { menuExpanded = true }) { Icon(Icons.Filled.MoreVert, "Mais opções") }
                         DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                             DropdownMenuItem(text = { Text("Favoritos") }, onClick = { navController.navigate(Screen.Favorites.route); menuExpanded = false })
                             DropdownMenuItem(text = { Text("Configurações") }, onClick = { navController.navigate(Screen.Settings.route); menuExpanded = false })
                             DropdownMenuItem(text = { Text("Ajuda") }, onClick = { navController.navigate(Screen.Help.route); menuExpanded = false })
-                            // NOVO BOTÃO DE LOGOUT
                             DropdownMenuItem(
                                 text = { Text("Sair") },
                                 onClick = {
                                     viewModel.signOut()
-                                    // Navega para a tela de login e limpa toda a pilha de navegação
                                     navController.navigate(Screen.Login.route) {
                                         popUpTo(navController.graph.id) {
                                             inclusive = true
@@ -132,12 +141,7 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    BottomTabItem(
-                        icon = Icons.Default.Sync,
-                        label = "Hábitos",
-                        isSelected = selectedTab == TaskType.HABIT,
-                        onClick = { selectedTab = TaskType.HABIT }
-                    )
+                    BottomTabItem(icon = Icons.Default.Sync, label = "Hábitos", isSelected = selectedTab == TaskType.HABIT) { selectedTab = TaskType.HABIT }
                     Surface(
                         shape = DiamondShape,
                         color = MaterialTheme.colorScheme.primary,
@@ -147,19 +151,10 @@ fun HomeScreen(
                         tonalElevation = 4.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Adicionar Tarefa",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                            Icon(Icons.Default.Add, "Adicionar Tarefa", tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
-                    BottomTabItem(
-                        icon = Icons.Default.Checklist,
-                        label = "To Do's",
-                        isSelected = selectedTab == TaskType.TODO,
-                        onClick = { selectedTab = TaskType.TODO }
-                    )
+                    BottomTabItem(icon = Icons.Default.Checklist, label = "To Do's", isSelected = selectedTab == TaskType.TODO) { selectedTab = TaskType.TODO }
                 }
             }
         }
@@ -169,11 +164,13 @@ fun HomeScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            PlayerStatusHeader(onClick = { navController.navigate(Screen.Profile.route) })
-
+            PlayerStatusHeader(
+                playerStats = playerStats,
+                onClick = { navController.navigate(Screen.Profile.route) }
+            )
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = { searchQuery = it }, // CORRIGIDO AQUI
                 label = { Text("Buscar em ${selectedTab.name.lowercase().replaceFirstChar { it.titlecase() }}...") },
                 leadingIcon = { Icon(Icons.Filled.Search, "Ícone de Busca") },
                 modifier = Modifier
@@ -184,13 +181,11 @@ fun HomeScreen(
 
             when (val state = uiState) {
                 is HomeUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                 }
                 is HomeUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-                        Text(text = state.message, style = MaterialTheme.typography.bodyLarge)
+                        Text(state.message, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
                 is HomeUiState.Success -> {
@@ -211,25 +206,32 @@ fun HomeScreen(
 
                     if (filteredChallenges.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "Nenhum desafio encontrado.",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                            Text("Nenhum desafio encontrado.", style = MaterialTheme.typography.bodyLarge)
                         }
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(vertical = 8.dp),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(filteredChallenges, key = { it.id }) { challenge ->
                                 ChallengeItemCard(
                                     challenge = challenge,
                                     onClick = { onChallengeClick(challenge) },
-                                    onPositiveAction = { println("Ação POSITIVA para: ${challenge.title}") },
-                                    onNegativeAction = { println("Ação NEGATIVA para: ${challenge.title}") },
+                                    shouldAnimate = lastInteractedChallengeId == challenge.id,
+                                    onPositiveAction = {
+                                        viewModel.onChallengeActionPerformed(challenge, isPositive = true)
+                                        lastInteractedChallengeId = challenge.id
+                                    },
+                                    onNegativeAction = {
+                                        viewModel.onChallengeActionPerformed(challenge, isPositive = false)
+                                        lastInteractedChallengeId = challenge.id
+                                    },
                                     onTodoChecked = { isChecked ->
-                                        // TODO: Atualizar estado no Firebase
+                                        if (isChecked) {
+                                            viewModel.onChallengeActionPerformed(challenge, isPositive = true)
+                                            lastInteractedChallengeId = challenge.id
+                                        }
                                     },
                                     modifier = Modifier.padding(horizontal = 16.dp)
                                 )

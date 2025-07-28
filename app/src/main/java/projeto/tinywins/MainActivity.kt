@@ -31,7 +31,6 @@ import projeto.tinywins.data.FirebaseRepository
 import projeto.tinywins.data.NetworkStatusTracker
 import projeto.tinywins.data.SettingsDataStore
 import projeto.tinywins.data.auth.AuthRepository
-import projeto.tinywins.data.sampleChallenges
 import projeto.tinywins.ui.NavArgs
 import projeto.tinywins.ui.Screen
 import projeto.tinywins.ui.auth.LoginScreen
@@ -49,7 +48,9 @@ import projeto.tinywins.ui.viewmodel.CreateTaskViewModel
 import projeto.tinywins.ui.viewmodel.FavoritesViewModel
 import projeto.tinywins.ui.viewmodel.HomeViewModel
 import projeto.tinywins.ui.viewmodel.LoginViewModel
+import projeto.tinywins.ui.viewmodel.ProfileViewModel
 import projeto.tinywins.ui.viewmodel.RegistrationViewModel
+import projeto.tinywins.ui.viewmodel.SettingsViewModel
 import projeto.tinywins.ui.viewmodel.ViewModelFactory
 
 class MainActivity : ComponentActivity() {
@@ -174,10 +175,12 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(route = Screen.Settings.route) {
+                        val settingsViewModel: SettingsViewModel = viewModel(factory = viewModelFactory)
                         val areNotificationsEnabled by settingsDataStore.notificationsPreferenceFlow.collectAsState(initial = true)
                         val areAnimationsEnabled by settingsDataStore.animationsPreferenceFlow.collectAsState(initial = true)
                         SettingsScreen(
                             navController = navController,
+                            viewModel = settingsViewModel,
                             currentThemeIsDark = currentDarkTheme,
                             onThemeToggled = { newThemeState ->
                                 coroutineScope.launch {
@@ -199,13 +202,16 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // A rota de Ajuda agora tem um destino
                     composable(route = Screen.Help.route) {
                         HelpScreen(navController = navController)
                     }
 
                     composable(route = Screen.Profile.route) {
-                        ProfileScreen(navController = navController)
+                        val profileViewModel: ProfileViewModel = viewModel(factory = viewModelFactory)
+                        ProfileScreen(
+                            navController = navController,
+                            viewModel = profileViewModel
+                        )
                     }
                 }
             }
