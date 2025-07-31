@@ -61,7 +61,6 @@ class HomeViewModel(
 
     fun onChallengeActionPerformed(challenge: TinyWinChallenge, isPositive: Boolean) {
         viewModelScope.launch {
-            // Chama a nova função refatorada no repositório
             firebaseRepository.processChallengeAction(challenge, isPositiveAction = isPositive)
         }
     }

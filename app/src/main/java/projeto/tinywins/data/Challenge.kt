@@ -78,7 +78,13 @@ data class TinyWinChallenge(
     var currentProgress: Int = 0,
     val targetProgress: Int = 1,
     val pointsPerUnit: Int = 0,
-    @ServerTimestamp val createdAt: Date? = null
+    @ServerTimestamp val createdAt: Date? = null,
+
+    // NOVOS CAMPOS PARA O PROGRESSO DE HÁBITOS
+    val habitDurationInDays: Int = 0, // Duração total em dias (0 para sem fim)
+    val habitCurrentProgress: Int = 0, // Progresso atual em dias
+    @get:PropertyName("isHabitCompleted") val isHabitCompleted: Boolean = false, // Se o hábito foi concluído
+    val lastCompletedTimestamp: Date? = null // Última vez que a recompensa diária foi dada
 )
 
 @Composable

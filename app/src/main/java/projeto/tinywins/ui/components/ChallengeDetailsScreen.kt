@@ -1,63 +1,37 @@
-package projeto.tinywins.ui.components
+package projeto.tinywins.ui.screens
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Diamond
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import kotlinx.coroutines.launch
+import projeto.tinywins.data.Difficulty
+import projeto.tinywins.data.ResetFrequency
 import projeto.tinywins.data.TaskType
 import projeto.tinywins.data.TinyWinChallenge
+import projeto.tinywins.data.toColor
+import projeto.tinywins.data.toIcon
+import projeto.tinywins.ui.components.CategoryBanner
 import projeto.tinywins.ui.viewmodel.ChallengeDetailsViewModel
 import projeto.tinywins.ui.viewmodel.DetailsUiState
 
@@ -151,67 +125,148 @@ private fun ChallengeDetailsContent(
             .verticalScroll(rememberScrollState())
     ) {
         CategoryBanner(category = challenge.category)
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
             Text(text = challenge.title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Recompensas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                IconButton(onClick = {
-                    isFavorite = !isFavorite
-                    onFavoriteClick()
-                    coroutineScope.launch {
-                        scale.animateTo(targetValue = 1.3f, animationSpec = tween(100))
-                        scale.animateTo(targetValue = 1f, animationSpec = tween(100))
+
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Recompensas Diárias", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    IconButton(onClick = {
+                        isFavorite = !isFavorite
+                        onFavoriteClick()
+                        coroutineScope.launch {
+                            scale.animateTo(targetValue = 1.3f, animationSpec = tween(100))
+                            scale.animateTo(targetValue = 1f, animationSpec = tween(100))
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Favoritar",
+                            modifier = Modifier.scale(scale.value),
+                            tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                }) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Favoritar",
-                        modifier = Modifier.scale(scale.value),
-                        tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    RewardInfo(icon = Icons.Default.Star, text = "${challenge.xp} XP", iconColor = Color(0xFFFFC107))
+                    RewardInfo(icon = Icons.Default.MonetizationOn, text = "${challenge.coins}", iconColor = Color(0xFFD4AF37))
+                }
+            }
+
+            if (challenge.description.isNotBlank()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                ) {
+                    Text(
+                        text = challenge.description,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                RewardInfo(icon = Icons.Default.Star, text = "${challenge.xp} XP", iconColor = Color(0xFFFFC107))
-                RewardInfo(icon = Icons.Default.MonetizationOn, text = "${challenge.coins}", iconColor = Color(0xFFD4AF37))
-                if (challenge.diamonds > 0) {
-                    RewardInfo(icon = Icons.Default.Diamond, text = "${challenge.diamonds}", iconColor = Color(0xFF4FC3F7))
+
+            if (challenge.type == TaskType.HABIT && challenge.habitDurationInDays > 0) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = "Progresso de Longo Prazo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+
+                    val habitProgress = (challenge.habitCurrentProgress.toFloat() / challenge.habitDurationInDays.toFloat()).coerceIn(0f, 1f)
+                    val animatedHabitProgress by animateFloatAsState(targetValue = habitProgress, animationSpec = tween(500), label = "HabitProgressAnimation")
+
+                    if (challenge.isHabitCompleted) {
+                        InfoRow(label = "Status", value = "Hábito Concluído!")
+                    }
+
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = "Progresso", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                text = "${challenge.habitCurrentProgress} / ${challenge.habitDurationInDays} dias",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        LinearProgressIndicator(
+                            progress = { animatedHabitProgress },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(12.dp)
+                                .clip(MaterialTheme.shapes.small),
+                            strokeCap = StrokeCap.Round
+                        )
+                    }
+
+                    // SEÇÃO DE EXIBIÇÃO DO BÔNUS FINAL
+                    if (!challenge.isHabitCompleted) {
+                        val (bonusXp, bonusCoins, bonusDiamonds) = calculateCompletionBonus(challenge)
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f))
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    text = "Recompensa Final",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    RewardInfo(icon = Icons.Default.Star, text = "$bonusXp XP", iconColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                                    RewardInfo(icon = Icons.Default.MonetizationOn, text = "$bonusCoins", iconColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                                    RewardInfo(icon = Icons.Default.Diamond, text = "$bonusDiamonds", iconColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            ) {
-                Text(
-                    text = challenge.description,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(text = "Informações Adicionais", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
 
-            if (challenge.type == TaskType.HABIT && challenge.resetFrequency != null) {
-                InfoRow(label = "Frequência", value = challenge.resetFrequency.toPortuguese())
+            Column {
+                Text(text = "Informações Adicionais", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (challenge.type == TaskType.HABIT && challenge.resetFrequency != null) {
+                    InfoRow(label = "Frequência", value = challenge.resetFrequency.toPortuguese())
+                }
+                if (challenge.type == TaskType.TODO && challenge.dueDate != null) {
+                    InfoRow(label = "Data de Entrega", value = formatDate(challenge.dueDate))
+                }
+                InfoRow(label = "Dificuldade", value = challenge.difficulty.toPortuguese())
             }
-            if (challenge.type == TaskType.TODO && challenge.dueDate != null) {
-                InfoRow(label = "Data de Entrega", value = formatDate(challenge.dueDate))
-            }
-            InfoRow(label = "Dificuldade", value = challenge.difficulty.toPortuguese())
         }
     }
+}
+
+private fun calculateCompletionBonus(challenge: TinyWinChallenge): Triple<Int, Int, Int> {
+    if (challenge.habitDurationInDays <= 0) return Triple(0, 0, 0)
+
+    val difficultyMultiplier = (challenge.difficulty.ordinal + 1) * 1.5
+    val frequencyMultiplier = when (challenge.resetFrequency) {
+        ResetFrequency.WEEKLY -> 1.2
+        ResetFrequency.MONTHLY -> 1.5
+        else -> 1.0
+    }
+    val bonusXp = (challenge.habitDurationInDays * difficultyMultiplier * frequencyMultiplier * 2).toInt()
+    val bonusCoins = (bonusXp / 2).coerceAtLeast(20)
+    val bonusDiamonds = (challenge.habitDurationInDays / 10).coerceAtLeast(1)
+
+    return Triple(bonusXp, bonusCoins, bonusDiamonds)
 }
 
 @Composable
@@ -240,7 +295,8 @@ private fun RewardInfo(icon: ImageVector, text: String, iconColor: Color) {
         Text(
             text = text,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = iconColor
         )
     }
 }

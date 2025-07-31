@@ -61,9 +61,7 @@ fun CreateTaskScreen(
 ) {
     var title by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
-    var selectedTaskType by remember {
-        mutableStateOf(startingTaskType?.let { TaskType.valueOf(it) } ?: TaskType.HABIT)
-    }
+    var selectedTaskType by remember { mutableStateOf(startingTaskType?.let { TaskType.valueOf(it) } ?: TaskType.HABIT) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.EASY) }
     var selectedFrequency by remember { mutableStateOf(ResetFrequency.DAILY) }
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
@@ -74,6 +72,7 @@ fun CreateTaskScreen(
     var selectedCategory by remember { mutableStateOf(ChallengeCategory.PRODUTIVIDADE) }
     var isPositiveHabit by remember { mutableStateOf(true) }
     var isNegativeHabit by remember { mutableStateOf(false) }
+    var habitDuration by remember { mutableStateOf(0) } // Valor inicial: Sem Fim
 
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -148,7 +147,8 @@ fun CreateTaskScreen(
                                 dueDate = if (selectedTaskType == TaskType.TODO) selectedDateMillis else null,
                                 checklist = if (selectedTaskType == TaskType.TODO) checklistItems.toList() else emptyList(),
                                 reminders = reminders.toList(),
-                                category = selectedCategory
+                                category = selectedCategory,
+                                habitDurationInDays = if (selectedTaskType == TaskType.HABIT) habitDuration else 0
                             )
                             if (newChallenge.reminders.isNotEmpty()) {
                                 newChallenge.reminders.forEach { reminderTime ->
@@ -180,33 +180,49 @@ fun CreateTaskScreen(
                 }
             }
 
-            Column(modifier = Modifier.padding(16.dp)) {
-                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Título") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(value = notes, onValueChange = { notes = it }, label = { Text("Notas") }, modifier = Modifier.fillMaxWidth().height(120.dp))
-                Spacer(modifier = Modifier.height(24.dp))
-                Text("Categoria", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
-                    ChallengeCategory.entries.forEach { category ->
-                        FilterChip(
-                            selected = selectedCategory == category,
-                            onClick = { selectedCategory = category },
-                            label = { Text(category.name.lowercase().replaceFirstChar { it.titlecase() }) },
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                Column {
+                    OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Título") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(value = notes, onValueChange = { notes = it }, label = { Text("Notas") }, modifier = Modifier.fillMaxWidth().height(120.dp))
+                }
+
+                Column {
+                    Text("Categoria", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+                        ChallengeCategory.entries.forEach { category ->
+                            FilterChip(
+                                selected = selectedCategory == category,
+                                onClick = { selectedCategory = category },
+                                label = { Text(category.name.lowercase().replaceFirstChar { it.titlecase() }) },
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
-                Text("Dificuldade", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Difficulty.entries.forEach { difficulty ->
-                        DifficultyButton(difficulty = difficulty, isSelected = selectedDifficulty == difficulty, onClick = { selectedDifficulty = difficulty }, modifier = Modifier.weight(1f))
+
+                Column {
+                    Text("Dificuldade", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Difficulty.entries.forEach { difficulty ->
+                            DifficultyButton(difficulty = difficulty, isSelected = selectedDifficulty == difficulty, onClick = { selectedDifficulty = difficulty }, modifier = Modifier.weight(1f))
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+
                 if (selectedTaskType == TaskType.HABIT) {
-                    HabitOptions(isPositive = isPositiveHabit, onPositiveChange = { isPositiveHabit = it }, isNegative = isNegativeHabit, onNegativeChange = { isNegativeHabit = it }, selectedFrequency = selectedFrequency, onFrequencyChange = { selectedFrequency = it })
+                    HabitOptions(
+                        isPositive = isPositiveHabit,
+                        onPositiveChange = { isPositiveHabit = it },
+                        isNegative = isNegativeHabit,
+                        onNegativeChange = { isNegativeHabit = it },
+                        selectedFrequency = selectedFrequency,
+                        onFrequencyChange = { selectedFrequency = it },
+                        selectedDuration = habitDuration,
+                        onDurationChange = { habitDuration = it }
+                    )
                 } else {
                     TodoOptions(selectedDateMillis, { showDatePicker = true }, checklistItems, { checklistItems.add(ChecklistItem(text = "")) }, { index, newText -> checklistItems[index] = checklistItems[index].copy(text = newText) }, { index -> checklistItems.removeAt(index) }, reminders, { showTimePicker = true }, { index -> reminders.removeAt(index) })
                 }
@@ -216,7 +232,16 @@ fun CreateTaskScreen(
 }
 
 @Composable
-private fun HabitOptions(isPositive: Boolean, onPositiveChange: (Boolean) -> Unit, isNegative: Boolean, onNegativeChange: (Boolean) -> Unit, selectedFrequency: ResetFrequency, onFrequencyChange: (ResetFrequency) -> Unit) {
+private fun HabitOptions(
+    isPositive: Boolean,
+    onPositiveChange: (Boolean) -> Unit,
+    isNegative: Boolean,
+    onNegativeChange: (Boolean) -> Unit,
+    selectedFrequency: ResetFrequency,
+    onFrequencyChange: (ResetFrequency) -> Unit,
+    selectedDuration: Int,
+    onDurationChange: (Int) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column {
             Text("Tipo de Interação", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -235,45 +260,64 @@ private fun HabitOptions(isPositive: Boolean, onPositiveChange: (Boolean) -> Uni
                 }
             }
         }
+        // NOVA SEÇÃO PARA DURAÇÃO DO HÁBITO
+        Column {
+            Text("Duração do Hábito (Opcional)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val durations = listOf(0, 7, 21, 30, 90) // 0 representa "Sem Fim"
+                durations.forEach { duration ->
+                    FilterChip(
+                        selected = selectedDuration == duration,
+                        onClick = { onDurationChange(duration) },
+                        label = { Text(if (duration == 0) "Sem Fim" else "$duration dias") }
+                    )
+                }
+            }
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TodoOptions(selectedDateMillis: Long?, onDateClick: () -> Unit, checklistItems: SnapshotStateList<ChecklistItem>, onChecklistItemAdded: () -> Unit, onChecklistItemChanged: (Int, String) -> Unit, onChecklistItemRemoved: (Int) -> Unit, reminders: List<Long>, onAddReminderClick: () -> Unit, onRemoveReminderClick: (Int) -> Unit) {
-    Column {
-        Text("Agendamento", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(modifier = Modifier.clickable(onClick = onDateClick)) {
-            OutlinedTextField(value = selectedDateMillis?.let { formatDate(it) } ?: "Selecione uma data", onValueChange = {}, enabled = false, label = { Text("Data de Entrega") }, trailingIcon = { Icon(Icons.Default.CalendarToday, "Selecionar Data") }, modifier = Modifier.fillMaxWidth(), colors = OutlinedTextFieldDefaults.colors(disabledTextColor = MaterialTheme.colorScheme.onSurface, disabledBorderColor = MaterialTheme.colorScheme.outline, disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant))
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("Checklist", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(8.dp))
-        checklistItems.forEachIndexed { index, item ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(value = item.text, onValueChange = { newText -> onChecklistItemChanged(index, newText) }, modifier = Modifier.weight(1f), label = { Text("Item ${index + 1}") })
-                IconButton(onClick = { onChecklistItemRemoved(index) }) { Icon(Icons.Default.Close, contentDescription = "Remover Item") }
-            }
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column {
+            Text("Agendamento", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(8.dp))
-        }
-        TextButton(onClick = onChecklistItemAdded) {
-            Icon(Icons.Default.Add, contentDescription = "Adicionar Item", modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text("Adicionar item")
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("Lembretes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        reminders.forEachIndexed { index, millis ->
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(text = formatTime(millis), modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-                IconButton(onClick = { onRemoveReminderClick(index) }) { Icon(Icons.Default.Close, contentDescription = "Remover Lembrete") }
+            Box(modifier = Modifier.clickable(onClick = onDateClick)) {
+                OutlinedTextField(value = selectedDateMillis?.let { formatDate(it) } ?: "Selecione uma data", onValueChange = {}, enabled = false, label = { Text("Data de Entrega") }, trailingIcon = { Icon(Icons.Default.CalendarToday, "Selecionar Data") }, modifier = Modifier.fillMaxWidth(), colors = OutlinedTextFieldDefaults.colors(disabledTextColor = MaterialTheme.colorScheme.onSurface, disabledBorderColor = MaterialTheme.colorScheme.outline, disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant))
             }
         }
-        TextButton(onClick = onAddReminderClick) {
-            Icon(Icons.Default.Add, contentDescription = "Adicionar Lembrete", modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text("Adicionar lembrete")
+        Column {
+            Text("Checklist", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(8.dp))
+            checklistItems.forEachIndexed { index, item ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(value = item.text, onValueChange = { newText -> onChecklistItemChanged(index, newText) }, modifier = Modifier.weight(1f), label = { Text("Item ${index + 1}") })
+                    IconButton(onClick = { onChecklistItemRemoved(index) }) { Icon(Icons.Default.Close, contentDescription = "Remover Item") }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            TextButton(onClick = onChecklistItemAdded) {
+                Icon(Icons.Default.Add, contentDescription = "Adicionar Item", modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Adicionar item")
+            }
+        }
+        Column {
+            Text("Lembretes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            reminders.forEachIndexed { index, millis ->
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = formatTime(millis), modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+                    IconButton(onClick = { onRemoveReminderClick(index) }) { Icon(Icons.Default.Close, contentDescription = "Remover Lembrete") }
+                }
+            }
+            TextButton(onClick = onAddReminderClick) {
+                Icon(Icons.Default.Add, contentDescription = "Adicionar Lembrete", modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Adicionar lembrete")
+            }
         }
     }
 }

@@ -6,9 +6,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +32,7 @@ import projeto.tinywins.ui.NavArgs
 import projeto.tinywins.ui.Screen
 import projeto.tinywins.ui.auth.LoginScreen
 import projeto.tinywins.ui.auth.RegistrationScreen
-import projeto.tinywins.ui.components.ChallengeDetailsScreen
+import projeto.tinywins.ui.screens.ChallengeDetailsScreen
 import projeto.tinywins.ui.screens.CreateTaskScreen
 import projeto.tinywins.ui.screens.FavoritesScreen
 import projeto.tinywins.ui.screens.HelpScreen
@@ -144,10 +141,12 @@ class MainActivity : ComponentActivity() {
                         route = Screen.ChallengeDetails.route,
                         arguments = listOf(navArgument(NavArgs.CHALLENGE_ID) { type = NavType.StringType })
                     ) { backStackEntry ->
-                        val challengeId = backStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID)
-                        val detailsViewModel = ChallengeDetailsViewModel(
-                            challengeId = challengeId ?: "",
-                            repository = firebaseRepository
+                        val challengeId = backStackEntry.arguments?.getString(NavArgs.CHALLENGE_ID) ?: ""
+                        val detailsViewModel: ChallengeDetailsViewModel = viewModel(
+                            factory = ChallengeDetailsViewModel.Factory(
+                                challengeId = challengeId,
+                                repository = firebaseRepository
+                            )
                         )
                         ChallengeDetailsScreen(
                             navController = navController,

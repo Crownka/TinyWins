@@ -1,6 +1,7 @@
 package projeto.tinywins.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -60,6 +61,20 @@ class ChallengeDetailsViewModel(
             } catch (e: Exception) {
                 println("Erro ao deletar desafio: ${e.message}")
             }
+        }
+    }
+
+    // FÁBRICA PARA CRIAR O VIEWMODEL COM PARÂMETROS
+    @Suppress("UNCHECKED_CAST")
+    class Factory(
+        private val challengeId: String,
+        private val repository: FirebaseRepository
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(ChallengeDetailsViewModel::class.java)) {
+                return ChallengeDetailsViewModel(challengeId, repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 }
