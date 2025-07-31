@@ -1,34 +1,10 @@
 package projeto.tinywins.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -48,6 +24,8 @@ fun SettingsScreen(
     onAnimationsToggled: (Boolean) -> Unit
 ) {
     var showClearFavoritesDialog by remember { mutableStateOf(false) }
+    var showClearHabitsDialog by remember { mutableStateOf(false) }
+    var showClearTodosDialog by remember { mutableStateOf(false) }
 
     if (showClearFavoritesDialog) {
         AlertDialog(
@@ -60,15 +38,37 @@ fun SettingsScreen(
                         viewModel.clearAllFavorites()
                         showClearFavoritesDialog = false
                     }
-                ) {
-                    Text("Confirmar")
-                }
+                ) { Text("Confirmar") }
             },
-            dismissButton = {
-                TextButton(onClick = { showClearFavoritesDialog = false }) {
-                    Text("Cancelar")
-                }
-            }
+            dismissButton = { TextButton(onClick = { showClearFavoritesDialog = false }) { Text("Cancelar") } }
+        )
+    }
+    if (showClearHabitsDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearHabitsDialog = false },
+            title = { Text("Confirmar Ação") },
+            text = { Text("Você tem certeza que deseja deletar TODOS os seus hábitos? Esta ação não pode ser desfeita.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteAllHabits()
+                    showClearHabitsDialog = false
+                }) { Text("Deletar Hábitos") }
+            },
+            dismissButton = { TextButton(onClick = { showClearHabitsDialog = false }) { Text("Cancelar") } }
+        )
+    }
+    if (showClearTodosDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearTodosDialog = false },
+            title = { Text("Confirmar Ação") },
+            text = { Text("Você tem certeza que deseja deletar TODAS as suas tarefas (To-Dos)? Esta ação não pode ser desfeita.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteAllTodos()
+                    showClearTodosDialog = false
+                }) { Text("Deletar To-Dos") }
+            },
+            dismissButton = { TextButton(onClick = { showClearTodosDialog = false }) { Text("Cancelar") } }
         )
     }
 
@@ -112,17 +112,32 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text("Gerenciamento de Dados", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
-
             Button(
                 onClick = { showClearFavoritesDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            ) { Text("Limpar Todos os Favoritos") }
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = { showClearHabitsDialog = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = MaterialTheme.colorScheme.onErrorContainer
                 )
-            ) {
-                Text("Limpar Todos os Favoritos")
-            }
+            ) { Text("Limpar Todos os Hábitos") }
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = { showClearTodosDialog = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            ) { Text("Limpar Todos os To-Dos") }
         }
     }
 }

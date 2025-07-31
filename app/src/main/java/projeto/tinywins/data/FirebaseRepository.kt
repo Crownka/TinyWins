@@ -21,9 +21,7 @@ class FirebaseRepository(private val networkStatusTracker: NetworkStatusTracker)
     private val auth = FirebaseAuth.getInstance()
 
     private fun getUserDocument() = auth.currentUser?.uid?.let { db.collection("users").document(it) }
-
     private fun getUserChallengesCollection(): CollectionReference? = getUserDocument()?.collection("challenges")
-
     private fun getUserStorageRef() = auth.currentUser?.uid?.let { storage.reference.child("profile_pictures/$it") }
 
     val isOnline: Flow<Boolean> = networkStatusTracker.isOnline
@@ -57,6 +55,55 @@ class FirebaseRepository(private val networkStatusTracker: NetworkStatusTracker)
             }
     }
 
+    suspend fun toggleFavoriteStatus(challengeId: String, isCurrentlyFavorite: Boolean) {
+        getUserChallengesCollection()?.document(challengeId)?.update("isFavorite", !isCurrentlyFavorite)
+    }
+
+    suspend fun addChallenge(challenge: TinyWinChallenge) {
+        getUserChallengesCollection()?.add(challenge)
+    }
+
+    suspend fun updateChallenge(challengeId: String, challenge: TinyWinChallenge) {
+        getUserChallengesCollection()?.document(challengeId)?.set(challenge)
+    }
+
+    suspend fun processChallengeAction(challenge: TinyWinChallenge, isPositiveAction: Boolean) {
+        val userDoc = getUserDocument() ?: return
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(userDoc)
+            val currentStats = snapshot.toObject(PlayerStats::class.java) ?: return@runTransaction
+
+            var newHealth = currentStats.health
+            var newXp = currentStats.xp
+            var newCoins = currentStats.coins
+            var newLevel = currentStats.level
+            var newDiamonds = currentStats.diamonds
+
+            if (isPositiveAction) {
+                newXp += challenge.xp
+                newCoins += challenge.coins
+                newHealth = (currentStats.health + 5).coerceIn(0, currentStats.maxHealth)
+                val xpToNextLvl = currentStats.xpToNextLevel()
+                if (newXp >= xpToNextLvl) {
+                    newXp -= xpToNextLvl
+                    newLevel += 1
+                    newHealth = currentStats.maxHealth
+                    newDiamonds += 1
+                }
+            } else {
+                newHealth = (currentStats.health - 10).coerceIn(0, currentStats.maxHealth)
+            }
+
+            transaction.update(userDoc, mapOf(
+                "xp" to newXp,
+                "coins" to newCoins,
+                "health" to newHealth,
+                "level" to newLevel,
+                "diamonds" to newDiamonds
+            ))
+        }.await()
+    }
+
     fun getPlayerStats(): Flow<PlayerStats?> {
         val userDoc = getUserDocument() ?: return emptyFlow()
         return userDoc.snapshots().map { snapshot ->
@@ -75,68 +122,6 @@ class FirebaseRepository(private val networkStatusTracker: NetworkStatusTracker)
             val initialStats = PlayerStats(userId = userDoc.id, displayName = "Novo Jogador")
             userDoc.set(initialStats).await()
         }
-    }
-
-    /**
-     * LÓGICA DE GAMIFICAÇÃO ATUALIZADA
-     * @param challenge O desafio que sofreu a ação.
-     * @param isPositiveAction True se o usuário clicou em '+', false se clicou em '-'.
-     */
-    suspend fun processChallengeAction(challenge: TinyWinChallenge, isPositiveAction: Boolean) {
-        val userDoc = getUserDocument() ?: return
-        db.runTransaction { transaction ->
-            val snapshot = transaction.get(userDoc)
-            val currentStats = snapshot.toObject(PlayerStats::class.java) ?: return@runTransaction
-
-            var newHealth = currentStats.health
-            var newXp = currentStats.xp
-            var newCoins = currentStats.coins
-            var newLevel = currentStats.level
-            var newDiamonds = currentStats.diamonds
-
-            if (isPositiveAction) {
-                // Ação Positiva (+): Ganha XP, moedas e recupera um pouco de vida
-                newXp += challenge.xp
-                newCoins += challenge.coins
-                newHealth = (currentStats.health + 5).coerceIn(0, currentStats.maxHealth) // Recupera 5 de vida
-
-                // Lógica de Level Up
-                val xpToNextLvl = currentStats.xpToNextLevel()
-                if (newXp >= xpToNextLvl) {
-                    newXp -= xpToNextLvl
-                    newLevel += 1
-                    newHealth = currentStats.maxHealth // Vida cheia ao subir de nível
-                    newDiamonds += 1
-                }
-            } else {
-                // Ação Negativa (-): Apenas perde vida
-                newHealth = (currentStats.health - 10).coerceIn(0, currentStats.maxHealth) // Perde 10 de vida
-            }
-
-            transaction.update(userDoc, mapOf(
-                "xp" to newXp,
-                "coins" to newCoins,
-                "health" to newHealth,
-                "level" to newLevel,
-                "diamonds" to newDiamonds
-            ))
-        }.await()
-    }
-
-    suspend fun toggleFavoriteStatus(challengeId: String, isCurrentlyFavorite: Boolean) {
-        getUserChallengesCollection()?.document(challengeId)?.update("isFavorite", !isCurrentlyFavorite)
-    }
-
-    suspend fun addChallenge(challenge: TinyWinChallenge) {
-        getUserChallengesCollection()?.add(challenge)
-    }
-
-    suspend fun updateChallenge(challengeId: String, challenge: TinyWinChallenge) {
-        getUserChallengesCollection()?.document(challengeId)?.set(challenge)
-    }
-
-    suspend fun deleteChallenge(challengeId: String) {
-        getUserChallengesCollection()?.document(challengeId)?.delete()
     }
 
     suspend fun updateUserProfile(name: String, photoUrl: String?): Resource<Unit> {
@@ -173,5 +158,30 @@ class FirebaseRepository(private val networkStatusTracker: NetworkStatusTracker)
             batch.update(document.reference, "isFavorite", false)
         }
         batch.commit().await()
+    }
+
+    suspend fun deleteChallenge(challengeId: String) {
+        getUserChallengesCollection()?.document(challengeId)?.delete()?.await()
+    }
+
+    private suspend fun deleteAllFromQuery(query: com.google.firebase.firestore.Query) {
+        val batch = db.batch()
+        val snapshot = query.get().await()
+        snapshot.documents.forEach { batch.delete(it.reference) }
+        batch.commit().await()
+    }
+
+    suspend fun deleteAllHabits() {
+        getUserChallengesCollection()?.let {
+            val query = it.whereEqualTo("type", TaskType.HABIT.name)
+            deleteAllFromQuery(query)
+        }
+    }
+
+    suspend fun deleteAllTodos() {
+        getUserChallengesCollection()?.let {
+            val query = it.whereEqualTo("type", TaskType.TODO.name)
+            deleteAllFromQuery(query)
+        }
     }
 }

@@ -12,4 +12,16 @@ class SettingsViewModel(private val repository: FirebaseRepository) : ViewModel(
             repository.clearAllFavorites()
         }
     }
+
+    fun deleteAllHabits() {
+        viewModelScope.launch {
+            repository.deleteAllHabits()
+        }
+    }
+
+    fun deleteAllTodos() {
+        viewModelScope.launch {
+            repository.deleteAllTodos()
+        }
+    }
 }

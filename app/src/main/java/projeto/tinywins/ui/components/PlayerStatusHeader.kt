@@ -2,9 +2,11 @@ package projeto.tinywins.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background // IMPORT ADICIONADO
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material3.Icon
@@ -33,7 +36,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import projeto.tinywins.R
 import projeto.tinywins.data.PlayerStats
 
 @Composable
@@ -63,15 +65,36 @@ fun PlayerStatusHeader(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = if (stats.photoUrl.isNotBlank()) stats.photoUrl else R.drawable.pixel_avatar,
-                contentDescription = "Avatar do Jogador",
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(MaterialTheme.shapes.medium)
-                    .border(2.dp, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.medium),
-                contentScale = ContentScale.Crop
-            )
+            // Lógica condicional para a imagem de perfil
+            if (stats.photoUrl.isNotBlank()) {
+                AsyncImage(
+                    model = stats.photoUrl,
+                    contentDescription = "Avatar do Jogador",
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .border(2.dp, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.medium),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Ícone padrão "anônimo"
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .border(2.dp, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.surface),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Avatar Padrão",
+                        modifier = Modifier.size(56.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
 
             Spacer(modifier = Modifier.width(16.dp))
 

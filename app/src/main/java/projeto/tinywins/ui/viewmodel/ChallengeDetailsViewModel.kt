@@ -18,7 +18,7 @@ sealed interface DetailsUiState {
 }
 
 class ChallengeDetailsViewModel(
-    private val challengeId: String, // Tornamos o ID acessível na classe
+    private val challengeId: String,
     private val repository: FirebaseRepository
 ) : ViewModel() {
 
@@ -43,17 +43,22 @@ class ChallengeDetailsViewModel(
             )
     }
 
-    /**
-     * NOVA FUNÇÃO: Chama o repositório para alternar o status de favorito.
-     * @param challenge O desafio atual para sabermos seu estado.
-     */
     fun toggleFavoriteStatus(challenge: TinyWinChallenge) {
         viewModelScope.launch {
             try {
                 repository.toggleFavoriteStatus(challenge.id, challenge.isFavorite)
             } catch (e: Exception) {
-                // Em um app real, poderíamos emitir um estado de erro para a UI
                 println("Erro ao atualizar favorito: ${e.message}")
+            }
+        }
+    }
+
+    fun deleteChallenge() {
+        viewModelScope.launch {
+            try {
+                repository.deleteChallenge(challengeId)
+            } catch (e: Exception) {
+                println("Erro ao deletar desafio: ${e.message}")
             }
         }
     }

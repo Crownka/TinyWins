@@ -3,47 +3,15 @@ package projeto.tinywins.ui.components
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Diamond
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -64,6 +32,23 @@ fun ChallengeDetailsScreen(
     viewModel: ChallengeDetailsViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Deletar Desafio") },
+            text = { Text("Tem certeza que deseja deletar este desafio? Esta ação é permanente.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteChallenge()
+                    showDeleteDialog = false
+                    navController.popBackStack()
+                }) { Text("Deletar") }
+            },
+            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancelar") } }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -72,6 +57,11 @@ fun ChallengeDetailsScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(Icons.Default.Delete, "Deletar Desafio")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -115,11 +105,7 @@ private fun ChallengeDetailsContent(
     challenge: TinyWinChallenge,
     onFavoriteClick: () -> Unit
 ) {
-    // 1. Criamos um estado local para o ícone.
-    // A chave `challenge.isFavorite` garante que se o dado do Firebase mudar,
-    // nosso estado local será atualizado para refletir a "fonte da verdade".
     var isFavorite by remember(challenge.isFavorite) { mutableStateOf(challenge.isFavorite) }
-
     val coroutineScope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
 
@@ -129,11 +115,9 @@ private fun ChallengeDetailsContent(
             .verticalScroll(rememberScrollState())
     ) {
         CategoryBanner(category = challenge.category)
-
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = challenge.title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(16.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -141,18 +125,14 @@ private fun ChallengeDetailsContent(
             ) {
                 Text(text = "Recompensas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 IconButton(onClick = {
-                    // 2. Atualizamos o estado local IMEDIATAMENTE.
                     isFavorite = !isFavorite
-                    // 3. Em paralelo, pedimos para o ViewModel salvar a mudança no backend.
                     onFavoriteClick()
-                    // 4. A animação também é disparada.
                     coroutineScope.launch {
                         scale.animateTo(targetValue = 1.3f, animationSpec = tween(100))
                         scale.animateTo(targetValue = 1f, animationSpec = tween(100))
                     }
                 }) {
                     Icon(
-                        // 5. O ícone agora reflete nosso estado local instantâneo.
                         imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                         contentDescription = "Favoritar",
                         modifier = Modifier.scale(scale.value),
@@ -220,7 +200,6 @@ private fun ChallengeDetailsContent(
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
-
             Spacer(modifier = Modifier.weight(1f, fill = false))
             Button(
                 onClick = { /* TODO: Lógica para completar o desafio */ },
@@ -228,7 +207,7 @@ private fun ChallengeDetailsContent(
                     .fillMaxWidth()
                     .padding(top = 16.dp)
             ) {
-                Text("COMPLETAR", style = MaterialTheme. typography.labelLarge)
+                Text("COMPLETAR", style = MaterialTheme.typography.labelLarge)
             }
         }
     }

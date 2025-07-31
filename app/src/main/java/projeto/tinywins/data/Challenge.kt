@@ -19,14 +19,35 @@ import java.util.Date
 import java.util.UUID
 
 enum class TaskType { HABIT, TODO }
-enum class Difficulty { TRIVIAL, EASY, MEDIUM, HARD }
-enum class ResetFrequency { DAILY, WEEKLY, MONTHLY }
+
+enum class Difficulty {
+    TRIVIAL, EASY, MEDIUM, HARD;
+
+    fun toPortuguese(): String {
+        return when (this) {
+            TRIVIAL -> "Trivial"
+            EASY -> "Fácil"
+            MEDIUM -> "Médio"
+            HARD -> "Difícil"
+        }
+    }
+}
+
+enum class ResetFrequency {
+    DAILY, WEEKLY, MONTHLY;
+
+    fun toPortuguese(): String {
+        return when (this) {
+            DAILY -> "Diário"
+            WEEKLY -> "Semanal"
+            MONTHLY -> "Mensal"
+        }
+    }
+}
 
 data class ChecklistItem(
     val id: String = UUID.randomUUID().toString(),
     var text: String = "",
-    // Para o Firestore, booleanos simples funcionam melhor sem o prefixo "is" na declaração da classe.
-    // Mas vamos manter a consistência e usar PropertyName para garantir.
     @get:PropertyName("isCompleted") val isCompleted: Boolean = false
 )
 
@@ -44,21 +65,15 @@ data class TinyWinChallenge(
     val coins: Int = 0,
     val diamonds: Int = 0,
     val difficulty: Difficulty = Difficulty.EASY,
-
-    // A anotação @get:PropertyName força o Firebase a usar EXATAMENTE este nome
-    // tanto para ler quanto para escrever, resolvendo o bug.
     @get:PropertyName("isPositive") val isPositive: Boolean = true,
     @get:PropertyName("isNegative") val isNegative: Boolean = false,
-
     val resetFrequency: ResetFrequency? = null,
     val dueDate: Long? = null,
     val reminders: List<Long> = emptyList(),
     val checklist: List<ChecklistItem> = emptyList(),
     val category: ChallengeCategory = ChallengeCategory.PRODUTIVIDADE,
-
     @get:PropertyName("isCompleted") val isCompleted: Boolean = false,
     @get:PropertyName("isFavorite") val isFavorite: Boolean = false,
-
     val quantifiable: Boolean = false,
     var currentProgress: Int = 0,
     val targetProgress: Int = 1,

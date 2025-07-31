@@ -2,54 +2,14 @@ package projeto.tinywins.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,16 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
-import projeto.tinywins.data.ChallengeCategory
-import projeto.tinywins.data.ChecklistItem
-import projeto.tinywins.data.Difficulty
-import projeto.tinywins.data.ResetFrequency
-import projeto.tinywins.data.TaskType
-import projeto.tinywins.data.TinyWinChallenge
+import java.util.*
+import projeto.tinywins.data.*
 import projeto.tinywins.ui.viewmodel.CreateTaskUiState
 import projeto.tinywins.ui.viewmodel.CreateTaskViewModel
 
@@ -284,7 +236,7 @@ private fun HabitOptions(
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ResetFrequency.entries.forEach { frequency ->
-                    FilterChip(selected = selectedFrequency == frequency, onClick = { onFrequencyChange(frequency) }, label = { Text(frequency.name.lowercase().replaceFirstChar { it.titlecase() }) })
+                    FilterChip(selected = selectedFrequency == frequency, onClick = { onFrequencyChange(frequency) }, label = { Text(frequency.toPortuguese()) })
                 }
             }
         }
@@ -293,12 +245,7 @@ private fun HabitOptions(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TodoOptions(
-    selectedDateMillis: Long?, onDateClick: () -> Unit, checklistItems: SnapshotStateList<ChecklistItem>,
-    onChecklistItemAdded: () -> Unit, onChecklistItemChanged: (Int, String) -> Unit,
-    onChecklistItemRemoved: (Int) -> Unit, reminders: List<Long>, onAddReminderClick: () -> Unit,
-    onRemoveReminderClick: (Int) -> Unit
-) {
+private fun TodoOptions(selectedDateMillis: Long?, onDateClick: () -> Unit, checklistItems: SnapshotStateList<ChecklistItem>, onChecklistItemAdded: () -> Unit, onChecklistItemChanged: (Int, String) -> Unit, onChecklistItemRemoved: (Int) -> Unit, reminders: List<Long>, onAddReminderClick: () -> Unit, onRemoveReminderClick: (Int) -> Unit) {
     Column {
         Text("Agendamento", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(8.dp))
@@ -348,7 +295,7 @@ private fun DifficultyButton(difficulty: Difficulty, isSelected: Boolean, onClic
                     Icon(imageVector = Icons.Default.Star, contentDescription = null, tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 }
             }
-            Text(text = difficulty.name.lowercase().replaceFirstChar { it.titlecase() }, style = MaterialTheme.typography.labelMedium, color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = difficulty.toPortuguese(), style = MaterialTheme.typography.labelMedium, color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
