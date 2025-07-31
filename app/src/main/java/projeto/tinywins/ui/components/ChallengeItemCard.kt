@@ -26,9 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,9 +50,10 @@ fun ChallengeItemCard(
     onNegativeAction: (() -> Unit)? = null,
     onTodoChecked: ((Boolean) -> Unit)? = null
 ) {
-    var isTodoChecked by remember(challenge.id, challenge.isCompleted) { mutableStateOf(challenge.isCompleted) }
-    val cardAlpha = if (isTodoChecked && challenge.type == TaskType.TODO) 0.6f else 1f
-    val textDecoration = if (isTodoChecked && challenge.type == TaskType.TODO) TextDecoration.LineThrough else TextDecoration.None
+    // O estado local foi removido. A UI agora é "burra" e apenas reflete os dados do Firebase.
+    val isCompleted = challenge.isCompleted
+    val cardAlpha = if (isCompleted && challenge.type == TaskType.TODO) 0.6f else 1f
+    val textDecoration = if (isCompleted && challenge.type == TaskType.TODO) TextDecoration.LineThrough else TextDecoration.None
 
     val scale by animateFloatAsState(
         targetValue = if (shouldAnimate) 1.05f else 1f,
@@ -81,7 +79,6 @@ fun ChallengeItemCard(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Área Clicável da Esquerda (Negativo)
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -101,7 +98,6 @@ fun ChallengeItemCard(
                 }
             }
 
-            // Área Central Clicável (Detalhes)
             Column(
                 modifier = Modifier
                     .weight(0.6f)
@@ -132,18 +128,16 @@ fun ChallengeItemCard(
                 DifficultyIndicator(difficulty = challenge.difficulty)
             }
 
-            // Área Clicável da Direita (Positivo / Checkbox)
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(0.2f)
                     .clickable(
-                        enabled = (challenge.isPositive && onPositiveAction != null) || (onTodoChecked != null && !isTodoChecked),
+                        enabled = (challenge.isPositive && onPositiveAction != null) || (onTodoChecked != null && !isCompleted),
                         onClick = {
                             if (challenge.type == TaskType.HABIT) {
                                 onPositiveAction?.invoke()
-                            } else if (challenge.type == TaskType.TODO && !isTodoChecked) {
-                                isTodoChecked = true
+                            } else if (challenge.type == TaskType.TODO && !isCompleted) {
                                 onTodoChecked?.invoke(true)
                             }
                         }
@@ -162,9 +156,9 @@ fun ChallengeItemCard(
                     }
                     TaskType.TODO -> {
                         Checkbox(
-                            checked = isTodoChecked,
+                            checked = isCompleted,
                             onCheckedChange = null,
-                            enabled = !isTodoChecked
+                            enabled = !isCompleted
                         )
                     }
                 }

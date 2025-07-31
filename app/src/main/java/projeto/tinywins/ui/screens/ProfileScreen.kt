@@ -1,6 +1,7 @@
 package projeto.tinywins.ui.screens
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,12 +25,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import projeto.tinywins.data.PlayerStats
-import projeto.tinywins.ui.viewmodel.ProfileUiState
+import projeto.tinywins.ui.viewmodel.ProfileScreenUiState
 import projeto.tinywins.ui.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,12 +40,29 @@ fun ProfileScreen(
     navController: NavHostController,
     viewModel: ProfileViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.dataState.collectAsState()
+    val screenState by viewModel.screenUiState.collectAsState()
+
     val stats = uiState.playerStats ?: PlayerStats()
     val calculatedStats = uiState.calculatedStats
 
     var displayName by remember(stats.displayName) { mutableStateOf(stats.displayName) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
+
+    LaunchedEffect(screenState) {
+        when (val state = screenState) {
+            is ProfileScreenUiState.Success -> {
+                Toast.makeText(context, "Perfil salvo com sucesso!", Toast.LENGTH_SHORT).show()
+                viewModel.resetScreenState()
+            }
+            is ProfileScreenUiState.Error -> {
+                Toast.makeText(context, "Erro: ${state.message}", Toast.LENGTH_LONG).show()
+                viewModel.resetScreenState()
+            }
+            else -> Unit
+        }
+    }
 
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -60,10 +79,16 @@ fun ProfileScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = {
-                        viewModel.updateProfile(displayName, selectedImageUri)
-                    }) {
-                        Text("SALVAR")
+                    val isLoading = screenState is ProfileScreenUiState.Loading
+                    TextButton(
+                        onClick = { viewModel.updateProfile(displayName, selectedImageUri) },
+                        enabled = !isLoading
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        } else {
+                            Text("SALVAR")
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -166,7 +191,7 @@ fun ProfileScreen(
                 StatItem(icon = Icons.Default.Checklist, label = "Hábitos Criados", value = "${calculatedStats.habitCount}")
                 StatItem(icon = Icons.AutoMirrored.Filled.List, label = "To-Dos Criados", value = "${calculatedStats.todoCount}")
                 StatItem(icon = Icons.Default.Favorite, label = "Desafios Favoritados", value = "${calculatedStats.favoriteCount}")
-                StatItem(icon = Icons.Default.TaskAlt, label = "Total Completos (Exemplo)", value = "${calculatedStats.completedCount}")
+                StatItem(icon = Icons.Default.TaskAlt, label = "Total de Tarefas Concluídas", value = "${calculatedStats.completedCount}")
             }
         }
     }

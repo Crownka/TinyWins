@@ -1,25 +1,11 @@
 package projeto.tinywins.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -59,16 +45,28 @@ fun HelpScreen(navController: NavHostController) {
                 answer = "Tiny Wins é um aplicativo de produtividade que transforma a criação de hábitos e a conclusão de tarefas em um jogo. Ao completar seus desafios, você ganha XP, moedas e sobe de nível, como em um RPG."
             )
             FaqItem(
+                question = "Qual a diferença entre Hábito e To Do?",
+                answer = "Um 'Hábito' é uma tarefa recorrente que você pode completar várias vezes (ex: diariamente). Um 'To Do' é uma tarefa única com um objetivo específico. Hábitos podem ser positivos (dão recompensas), negativos (tiram vida) ou ambos. To-Dos são sempre positivos."
+            )
+            FaqItem(
+                question = "Como funciona o sistema de XP e Níveis?",
+                answer = "Cada desafio completado te dá pontos de experiência (XP). Ao acumular XP suficiente, você sobe de nível. Subir de nível restaura sua saúde completamente e te dá diamantes como recompensa!"
+            )
+            FaqItem(
+                question = "Para que serve a Saúde?",
+                answer = "Sua saúde diminui quando você falha em completar um hábito negativo (clicando no botão '-'). Se sua saúde chegar a zero, você sofrerá uma penalidade. Completar hábitos positivos recupera um pouco de sua saúde."
+            )
+            FaqItem(
+                question = "Como funcionam as notificações?",
+                answer = "Ao criar ou editar uma tarefa do tipo 'To Do', você pode adicionar lembretes em horários específicos. O aplicativo irá te enviar uma notificação para que você não se esqueça de completar suas metas."
+            )
+            FaqItem(
                 question = "Como funciona o modo offline?",
                 answer = "O aplicativo salva seus dados localmente. Você pode criar, editar e completar desafios mesmo sem internet. Assim que a conexão for restabelecida, todas as suas alterações serão sincronizadas automaticamente com a nuvem."
             )
             FaqItem(
                 question = "Meus dados estão seguros?",
                 answer = "Sim. Cada usuário possui sua própria base de dados na nuvem, protegida pela autenticação do Firebase. Ninguém além de você pode acessar seus desafios e seu progresso."
-            )
-            FaqItem(
-                question = "Como posso sugerir uma melhoria ou reportar um bug?",
-                answer = "Este projeto foi desenvolvido como um trabalho acadêmico. Para sugestões, por favor, entre em contato diretamente com o desenvolvedor, Patrick."
             )
         }
     }

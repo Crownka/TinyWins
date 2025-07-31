@@ -1,5 +1,6 @@
 package projeto.tinywins.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -54,11 +56,14 @@ fun TimePickerDialog(onDismissRequest: () -> Unit, onConfirm: (Calendar) -> Unit
 @Composable
 fun CreateTaskScreen(
     navController: NavHostController,
-    viewModel: CreateTaskViewModel
+    viewModel: CreateTaskViewModel,
+    startingTaskType: String?
 ) {
     var title by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
-    var selectedTaskType by remember { mutableStateOf(TaskType.HABIT) }
+    var selectedTaskType by remember {
+        mutableStateOf(startingTaskType?.let { TaskType.valueOf(it) } ?: TaskType.HABIT)
+    }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.EASY) }
     var selectedFrequency by remember { mutableStateOf(ResetFrequency.DAILY) }
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
@@ -71,6 +76,8 @@ fun CreateTaskScreen(
     var isNegativeHabit by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val alarmScheduler = remember { AlarmScheduler(context) }
 
     LaunchedEffect(uiState) {
         if (uiState is CreateTaskUiState.Success) {
@@ -143,6 +150,11 @@ fun CreateTaskScreen(
                                 reminders = reminders.toList(),
                                 category = selectedCategory
                             )
+                            if (newChallenge.reminders.isNotEmpty()) {
+                                newChallenge.reminders.forEach { reminderTime ->
+                                    alarmScheduler.schedule(newChallenge, reminderTime)
+                                }
+                            }
                             viewModel.createChallenge(newChallenge)
                         },
                         enabled = title.isNotBlank() && !isLoading
@@ -173,7 +185,6 @@ fun CreateTaskScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(value = notes, onValueChange = { notes = it }, label = { Text("Notas") }, modifier = Modifier.fillMaxWidth().height(120.dp))
                 Spacer(modifier = Modifier.height(24.dp))
-
                 Text("Categoria", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
                     ChallengeCategory.entries.forEach { category ->
@@ -186,7 +197,6 @@ fun CreateTaskScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-
                 Text("Dificuldade", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -195,16 +205,8 @@ fun CreateTaskScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-
                 if (selectedTaskType == TaskType.HABIT) {
-                    HabitOptions(
-                        isPositive = isPositiveHabit,
-                        onPositiveChange = { isPositiveHabit = it },
-                        isNegative = isNegativeHabit,
-                        onNegativeChange = { isNegativeHabit = it },
-                        selectedFrequency = selectedFrequency,
-                        onFrequencyChange = { selectedFrequency = it }
-                    )
+                    HabitOptions(isPositive = isPositiveHabit, onPositiveChange = { isPositiveHabit = it }, isNegative = isNegativeHabit, onNegativeChange = { isNegativeHabit = it }, selectedFrequency = selectedFrequency, onFrequencyChange = { selectedFrequency = it })
                 } else {
                     TodoOptions(selectedDateMillis, { showDatePicker = true }, checklistItems, { checklistItems.add(ChecklistItem(text = "")) }, { index, newText -> checklistItems[index] = checklistItems[index].copy(text = newText) }, { index -> checklistItems.removeAt(index) }, reminders, { showTimePicker = true }, { index -> reminders.removeAt(index) })
                 }
@@ -214,14 +216,7 @@ fun CreateTaskScreen(
 }
 
 @Composable
-private fun HabitOptions(
-    isPositive: Boolean,
-    onPositiveChange: (Boolean) -> Unit,
-    isNegative: Boolean,
-    onNegativeChange: (Boolean) -> Unit,
-    selectedFrequency: ResetFrequency,
-    onFrequencyChange: (ResetFrequency) -> Unit
-) {
+private fun HabitOptions(isPositive: Boolean, onPositiveChange: (Boolean) -> Unit, isNegative: Boolean, onNegativeChange: (Boolean) -> Unit, selectedFrequency: ResetFrequency, onFrequencyChange: (ResetFrequency) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column {
             Text("Tipo de Interação", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)

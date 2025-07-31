@@ -3,15 +3,47 @@ package projeto.tinywins.ui.components
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Diamond
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -20,7 +52,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.launch
+import projeto.tinywins.data.TaskType
 import projeto.tinywins.data.TinyWinChallenge
 import projeto.tinywins.ui.viewmodel.ChallengeDetailsViewModel
 import projeto.tinywins.ui.viewmodel.DetailsUiState
@@ -163,53 +199,31 @@ private fun ChallengeDetailsContent(
                     modifier = Modifier.padding(16.dp)
                 )
             }
-            if (challenge.quantifiable) {
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(text = "Meu Progresso", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        val progress = (challenge.currentProgress.toFloat() / challenge.targetProgress.toFloat()).coerceIn(0f, 1f)
-                        val animatedProgress by animateFloatAsState(targetValue = progress, label = "Progress Animation")
-                        Box(contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(
-                                progress = { animatedProgress },
-                                modifier = Modifier.size(80.dp),
-                                strokeWidth = 8.dp,
-                            )
-                            Text(
-                                text = "${(animatedProgress * 100).toInt()}%",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Text(
-                            text = "${challenge.currentProgress} / ${challenge.targetProgress}",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    }
-                }
-            }
             Spacer(modifier = Modifier.height(24.dp))
-            Spacer(modifier = Modifier.weight(1f, fill = false))
-            Button(
-                onClick = { /* TODO: Lógica para completar o desafio */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-            ) {
-                Text("COMPLETAR", style = MaterialTheme.typography.labelLarge)
+            Text(text = "Informações Adicionais", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (challenge.type == TaskType.HABIT && challenge.resetFrequency != null) {
+                InfoRow(label = "Frequência", value = challenge.resetFrequency.toPortuguese())
             }
+            if (challenge.type == TaskType.TODO && challenge.dueDate != null) {
+                InfoRow(label = "Data de Entrega", value = formatDate(challenge.dueDate))
+            }
+            InfoRow(label = "Dificuldade", value = challenge.difficulty.toPortuguese())
         }
+    }
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, style = MaterialTheme.typography.bodyLarge)
+        Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -229,4 +243,9 @@ private fun RewardInfo(icon: ImageVector, text: String, iconColor: Color) {
             fontWeight = FontWeight.SemiBold
         )
     }
+}
+
+private fun formatDate(millis: Long): String {
+    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return formatter.format(Date(millis))
 }

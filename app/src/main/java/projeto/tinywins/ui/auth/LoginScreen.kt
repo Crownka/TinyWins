@@ -92,10 +92,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {
-                    // A CORREÇÃO ESTÁ AQUI: usamos .trim() para limpar os espaços
-                    viewModel.loginUser(email.trim(), password)
-                },
+                onClick = { viewModel.loginUser(email.trim(), password) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading
             ) {

@@ -155,11 +155,19 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable(Screen.CreateTask.route) {
+                    composable(
+                        route = Screen.CreateTask.route,
+                        arguments = listOf(navArgument(NavArgs.TASK_TYPE) {
+                            type = NavType.StringType
+                            nullable = true
+                        })
+                    ) { backStackEntry ->
+                        val taskType = backStackEntry.arguments?.getString(NavArgs.TASK_TYPE)
                         val createTaskViewModel: CreateTaskViewModel = viewModel(factory = viewModelFactory)
                         CreateTaskScreen(
                             navController = navController,
-                            viewModel = createTaskViewModel
+                            viewModel = createTaskViewModel,
+                            startingTaskType = taskType
                         )
                     }
 

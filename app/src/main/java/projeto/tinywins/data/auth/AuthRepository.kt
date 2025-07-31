@@ -2,6 +2,8 @@ package projeto.tinywins.data.auth
 
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.tasks.await
 
@@ -26,7 +28,13 @@ class AuthRepository {
             val result = auth.signInWithEmailAndPassword(email, password).await()
             Resource.Success(result)
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "Ocorreu um erro ao tentar fazer login.")
+            val errorMessage = when (e) {
+                is FirebaseAuthInvalidUserException, is FirebaseAuthInvalidCredentialsException -> {
+                    "E-mail ou senha incorretos."
+                }
+                else -> e.message ?: "Ocorreu um erro ao tentar fazer login."
+            }
+            Resource.Error(errorMessage)
         }
     }
 

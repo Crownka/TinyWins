@@ -2,7 +2,7 @@ package projeto.tinywins.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background // IMPORT ADICIONADO
+import androidx.compose.foundation.background // IMPORT ADICIONADO E CORRETO
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,7 +65,6 @@ fun PlayerStatusHeader(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Lógica condicional para a imagem de perfil
             if (stats.photoUrl.isNotBlank()) {
                 AsyncImage(
                     model = stats.photoUrl,
@@ -77,7 +76,6 @@ fun PlayerStatusHeader(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                // Ícone padrão "anônimo"
                 Box(
                     modifier = Modifier
                         .size(64.dp)

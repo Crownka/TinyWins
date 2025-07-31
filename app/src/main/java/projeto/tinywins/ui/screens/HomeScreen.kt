@@ -147,7 +147,9 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(56.dp)
-                            .clickable { navController.navigate(Screen.CreateTask.route) },
+                            .clickable {
+                                navController.navigate(Screen.CreateTask.createRoute(selectedTab.name))
+                            },
                         tonalElevation = 4.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -170,7 +172,7 @@ fun HomeScreen(
             )
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it }, // CORRIGIDO AQUI
+                onValueChange = { searchQuery = it },
                 label = { Text("Buscar em ${selectedTab.name.lowercase().replaceFirstChar { it.titlecase() }}...") },
                 leadingIcon = { Icon(Icons.Filled.Search, "Ícone de Busca") },
                 modifier = Modifier
@@ -206,7 +208,7 @@ fun HomeScreen(
 
                     if (filteredChallenges.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-                            Text("Nenhum desafio encontrado.", style = MaterialTheme.typography.bodyLarge)
+                            Text("Nenhum desafio encontrado. Clique no '+' para começar!", style = MaterialTheme.typography.bodyLarge)
                         }
                     } else {
                         LazyColumn(
